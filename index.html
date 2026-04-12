@@ -1,0 +1,80 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Japan Population Introduction</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0b0b0f;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    max-width: 900px;
+    text-align: center;
+    padding: 40px;
+    animation: fadeIn 3s ease-in-out;
+}
+
+h1 {
+    color: #e1a1a1;
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+p {
+    font-size: 20px;
+    line-height: 1.8;
+    opacity: 0;
+    animation: fadeInText 4s ease-in-out forwards;
+    animation-delay: 1.5s;
+}
+
+.question {
+    margin-top: 30px;
+    font-size: 22px;
+    font-weight: bold;
+    color: #e1a1a1;
+    opacity: 0;
+    animation: fadeInText 4s ease-in-out forwards;
+    animation-delay: 3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(1.05); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeInText {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Japan’s Population Challenge</h1>
+
+    <p>
+        Japan is experiencing a long-term population decline caused by low birth rates,
+        an aging society, and limited immigration. These changes are reshaping the country’s economy,
+        workforce, and future sustainability.
+    </p>
+
+    <div class="question">
+        To what extent can Japan’s government manage its population challenges to create a sustainable future by 2050?
+    </div>
+</div>
+
+</body>
+</html>
