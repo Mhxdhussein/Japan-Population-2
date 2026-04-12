@@ -11,7 +11,7 @@
 body {
     margin: 0;
     font-family: "Noto Sans JP", sans-serif;
-    background: white; /* ✅ CHANGED HERE */
+    background: white;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -19,11 +19,14 @@ body {
     color: #111;
 }
 
-/* MAIN WRAPPER */
+/* MAIN BOX (IMPORTANT FIX: added border so you SEE it) */
 .container {
     width: 520px;
     text-align: center;
     padding: 50px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
 }
 
 /* TITLE */
@@ -31,7 +34,6 @@ body {
     font-size: 24px;
     font-weight: 700;
     margin-bottom: 40px;
-    letter-spacing: 1px;
 }
 
 /* GRID */
@@ -39,14 +41,102 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 40px;
-    align-items: center;
-}
-
-/* BLOCKS */
-.block {
-    text-align: center;
 }
 
 /* LABEL */
 .label {
-    font-size: 16px
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+/* NUMBER */
+.number {
+    font-size: 46px;
+    font-weight: 700;
+    color: #111;
+}
+
+/* BUTTON */
+button {
+    margin-top: 40px;
+    padding: 12px 20px;
+    border: 1px solid #111;
+    background: white;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+button:hover {
+    background: #111;
+    color: white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="title">Japan Population Stats (Annual)</div>
+
+    <div class="grid">
+
+        <div>
+            <div class="label">Births</div>
+            <div class="number" id="births">0</div>
+        </div>
+
+        <div>
+            <div class="label">Deaths</div>
+            <div class="number" id="deaths">0</div>
+        </div>
+
+    </div>
+
+    <button onclick="replay()">Replay</button>
+
+</div>
+
+<script>
+
+const birthTarget = 727277;
+const deathTarget = 1576016;
+const duration = 7000;
+
+function animate(id, target) {
+    const el = document.getElementById(id);
+    let start = null;
+
+    function step(time) {
+        if (!start) start = time;
+
+        let progress = Math.min((time - start) / duration, 1);
+        let value = Math.floor(progress * target);
+
+        el.innerText = value.toLocaleString();
+
+        if (progress < 1) {
+            requestAnimationFrame(step);
+        }
+    }
+
+    requestAnimationFrame(step);
+}
+
+function start() {
+    animate("births", birthTarget);
+    animate("deaths", deathTarget);
+}
+
+function replay() {
+    document.getElementById("births").innerText = "0";
+    document.getElementById("deaths").innerText = "0";
+    start();
+}
+
+start();
+
+</script>
+
+</body>
+</html>
