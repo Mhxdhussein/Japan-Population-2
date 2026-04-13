@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Japan Live Population Counter</title>
+<title>Japan Live Counter</title>
 
 <style>
 body{
@@ -49,41 +49,42 @@ h2{
 <body>
 
 <div class="card">
-    <h2>Japan Population Flow (Realistic Live Estimate)</h2>
+    <h2>Japan Live Population Counter</h2>
 
-    <div class="stat birth">Births (year): <span id="b">0</span></div>
-    <div class="stat death">Deaths (year): <span id="d">0</span></div>
+    <div class="stat birth">Births (2026): <span id="b">0</span></div>
+    <div class="stat death">Deaths (2026): <span id="d">0</span></div>
 
     <div class="desc">
-        Based on Japan annual statistics (~700k births, ~1.5M deaths per year). Values show year-to-date progression.
+        Realistic estimate based on Japan annual statistics (~700k births, ~1.5M deaths per year).
     </div>
 </div>
 
 <script>
 
-// REAL ANNUAL ESTIMATES
-const birthsYear = 720000;   // realistic Japan range
+// REALISTIC ANNUAL DATA
+const birthsYear = 720000;
 const deathsYear = 1550000;
 
-// time constants
+// seconds in a year
 const secYear = 365 * 24 * 60 * 60;
 
-// per second flow
+// per second rate
 const birthRate = birthsYear / secYear;
 const deathRate = deathsYear / secYear;
 
-// START AT REALISTIC YEAR PROGRESS (THIS IS THE FIX)
+// 🔥 START FROM REALISTIC CURRENT YEAR VALUE (NOT ZERO)
 const now = new Date();
 const start = new Date(now.getFullYear(), 0, 1);
+
+// assume year-to-date progress already happened
 const progress = (now - start) / (1000 * secYear);
 
-// real YTD values
 let births = birthsYear * progress;
 let deaths = deathsYear * progress;
 
 let last = performance.now();
 
-function loop(t){
+function update(t){
     const dt = (t - last) / 1000;
     last = t;
 
@@ -96,10 +97,10 @@ function loop(t){
     document.getElementById("d").innerText =
         Math.floor(deaths).toLocaleString();
 
-    requestAnimationFrame(loop);
+    requestAnimationFrame(update);
 }
 
-requestAnimationFrame(loop);
+requestAnimationFrame(update);
 </script>
 
 </body>
