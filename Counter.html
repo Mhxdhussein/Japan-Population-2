@@ -54,13 +54,13 @@
     }
 
     .container {
-      max-width: 980px;
+      max-width: 1120px;
       margin: 0 auto;
       display: grid;
       gap: 18px;
     }
 
-    .header,
+    .hero,
     .card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -75,10 +75,39 @@
       font-weight: 700;
     }
 
+    .hero {
+      display: grid;
+      grid-template-columns: 1.45fr auto;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .hero h1 {
+      margin-bottom: 8px;
+      font-size: clamp(1.35rem, 2.2vw, 1.9rem);
+    }
+
+    .hero-tag {
+      justify-self: end;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
     .subtitle {
       margin: 0;
       color: var(--muted);
       line-height: 1.4;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.65fr) minmax(280px, 1fr);
+      gap: 14px;
+      align-items: start;
     }
 
     .stats {
@@ -113,9 +142,9 @@
       font-size: 0.84rem;
     }
 
-    .row {
+    .side-column {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 14px;
     }
 
@@ -155,7 +184,6 @@
     .toolbar {
       display: flex;
       justify-content: flex-end;
-      margin-bottom: 12px;
     }
 
     .theme-toggle {
@@ -173,85 +201,99 @@
       transform: translateY(-1px);
     }
 
-    @media (max-width: 740px) {
-      .row {
+    @media (max-width: 980px) {
+      .dashboard-grid {
         grid-template-columns: 1fr;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-tag {
+        justify-self: start;
       }
     }
   </style>
 </head>
 <body>
   <main class="container">
-    <div class="toolbar">
-      <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch theme">
-        Switch to Light Theme
-      </button>
-    </div>
-
-    <section class="header">
-      <h1>Japan Demographics Dashboard</h1>
-      <p class="subtitle">
-        Organized live view of Japan's estimated current population and latest available
-        official birth/death rates, pulled from World Bank indicators.
-      </p>
+    <section class="hero">
+      <div>
+        <h1>Japan Demographics Dashboard</h1>
+        <p class="subtitle">
+          Live demographic snapshot with official Japan data for population, birth rate, death rate, and annual growth.
+        </p>
+      </div>
+      <div class="toolbar">
+        <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch theme">
+          Switch to Light Theme
+        </button>
+      </div>
+      <span class="hero-tag">Country: JPN</span>
     </section>
 
     <div id="errorBox" class="error"></div>
 
-    <section class="stats">
-      <article class="stat">
-        <div class="label">Estimated Current Population</div>
-        <div id="populationNow" class="value">Loading...</div>
-        <div class="note" id="populationBase"></div>
-      </article>
-
-      <article class="stat">
-        <div class="label">Birth Rate (Crude, per 1,000 people)</div>
-        <div id="birthRate" class="value">Loading...</div>
-        <div class="note" id="birthYear"></div>
-      </article>
-
-      <article class="stat">
-        <div class="label">Death Rate (Crude, per 1,000 people)</div>
-        <div id="deathRate" class="value">Loading...</div>
-        <div class="note" id="deathYear"></div>
-      </article>
-
-      <article class="stat">
-        <div class="label">Population Growth Rate (annual %)</div>
-        <div id="growthRate" class="value">Loading...</div>
-        <div class="note" id="growthYear"></div>
-      </article>
-    </section>
-
-    <section class="row">
+    <section class="dashboard-grid">
       <article class="card">
-        <h2>Live Trend Signal</h2>
-        <p id="trendText" class="subtitle">Loading trend...</p>
-        <p style="margin-top:10px">
-          <span id="trendPill" class="pill">Checking...</span>
-        </p>
+        <h2>Core Metrics</h2>
+        <section class="stats">
+          <article class="stat">
+            <div class="label">Estimated Current Population</div>
+            <div id="populationNow" class="value">Loading...</div>
+            <div class="note" id="populationBase"></div>
+          </article>
+
+          <article class="stat">
+            <div class="label">Birth Rate (Crude, per 1,000 people)</div>
+            <div id="birthRate" class="value">Loading...</div>
+            <div class="note" id="birthYear"></div>
+          </article>
+
+          <article class="stat">
+            <div class="label">Death Rate (Crude, per 1,000 people)</div>
+            <div id="deathRate" class="value">Loading...</div>
+            <div class="note" id="deathYear"></div>
+          </article>
+
+          <article class="stat">
+            <div class="label">Population Growth Rate (annual %)</div>
+            <div id="growthRate" class="value">Loading...</div>
+            <div class="note" id="growthYear"></div>
+          </article>
+        </section>
       </article>
 
-      <article class="card">
-        <h2>Data Quality Notes</h2>
-        <ul>
-          <li>Rates are official yearly indicators, not second-by-second census data.</li>
-          <li>"Live population" is a real-time estimate from the latest annual growth rate.</li>
-          <li>Japan code used for all queries: <strong>JPN</strong>.</li>
-        </ul>
-      </article>
-    </section>
+      <section class="side-column">
+        <article class="card">
+          <h2>Live Trend Signal</h2>
+          <p id="trendText" class="subtitle">Loading trend...</p>
+          <p style="margin-top:10px">
+            <span id="trendPill" class="pill">Checking...</span>
+          </p>
+        </article>
 
-    <section class="card">
-      <h2>Sources</h2>
-      <ul>
-        <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.POP.TOTL?format=json" target="_blank" rel="noopener noreferrer">World Bank: Total Population</a></li>
-        <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.DYN.CBRT.IN?format=json" target="_blank" rel="noopener noreferrer">World Bank: Birth Rate</a></li>
-        <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.DYN.CDRT.IN?format=json" target="_blank" rel="noopener noreferrer">World Bank: Death Rate</a></li>
-        <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.POP.GROW?format=json" target="_blank" rel="noopener noreferrer">World Bank: Population Growth Rate</a></li>
-      </ul>
-      <p class="note" id="lastRefresh" style="margin-top:12px"></p>
+        <article class="card">
+          <h2>Data Quality Notes</h2>
+          <ul>
+            <li>Rates are official yearly indicators, not second-by-second census data.</li>
+            <li>"Live population" is a real-time estimate from the latest annual growth rate.</li>
+            <li>Japan code used for all queries: <strong>JPN</strong>.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h2>Sources</h2>
+          <ul>
+            <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.POP.TOTL?format=json" target="_blank" rel="noopener noreferrer">World Bank: Total Population</a></li>
+            <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.DYN.CBRT.IN?format=json" target="_blank" rel="noopener noreferrer">World Bank: Birth Rate</a></li>
+            <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.DYN.CDRT.IN?format=json" target="_blank" rel="noopener noreferrer">World Bank: Death Rate</a></li>
+            <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.POP.GROW?format=json" target="_blank" rel="noopener noreferrer">World Bank: Population Growth Rate</a></li>
+          </ul>
+          <p class="note" id="lastRefresh" style="margin-top:12px"></p>
+        </article>
+      </section>
     </section>
   </main>
 
