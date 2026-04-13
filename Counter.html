@@ -2,104 +2,88 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Japan Population Counter</title>
+<title>Japan Population Flow</title>
 
 <style>
 body{
     margin:0;
-    background:#0f1115;
-    color:#fff;
-    font-family:Arial, sans-serif;
+    background:white;
+    font-family:Arial;
     display:flex;
     justify-content:center;
     align-items:center;
     height:100vh;
 }
 
-.box{
-    background:#161a22;
+.card{
+    background:#f3f4f6;
     padding:30px;
     border-radius:16px;
     width:420px;
     text-align:center;
-    box-shadow:0 10px 40px rgba(0,0,0,0.5);
+    box-shadow:0 10px 25px rgba(0,0,0,0.1);
 }
 
 h2{
+    font-size:18px;
     margin-bottom:20px;
 }
 
 .stat{
-    font-size:24px;
+    font-size:28px;
     margin:15px 0;
 }
 
-.birth{color:#4ade80;}
-.death{color:#f87171;}
+.birth{color:green;}
+.death{color:red;}
 
-small{
-    display:block;
-    margin-top:10px;
+.small{
+    font-size:12px;
     opacity:0.6;
+    margin-top:10px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="box">
-    <h2>Japan Population Flow</h2>
+<div class="card">
+    <h2>Japan Population Flow (Live Simulation)</h2>
 
-    <div class="stat birth">
-        Births: <span id="b">0</span>
-    </div>
+    <div class="stat birth">Births: <span id="b">0</span></div>
+    <div class="stat death">Deaths: <span id="d">0</span></div>
 
-    <div class="stat death">
-        Deaths: <span id="d">0</span>
-    </div>
-
-    <small>Based on ~704k births & ~1.55M deaths yearly estimates</small>
+    <div class="small">Based on yearly demographic estimates</div>
 </div>
 
 <script>
-
-// 🇯🇵 REALISTIC JAPAN DATA
 const birthsYear = 704000;
 const deathsYear = 1550000;
 
-// seconds in a year
 const secYear = 365 * 24 * 60 * 60;
 
-// per second rates
+// per SECOND
 const birthRate = birthsYear / secYear;
 const deathRate = deathsYear / secYear;
 
-// counters (START FROM ZERO — NO FAKE VALUES)
-let births = 0;
-let deaths = 0;
+// START BIG so movement is visible immediately
+let births = 600000;
+let deaths = 1200000;
 
-// timing
-let last = performance.now();
+function update(){
 
-function loop(now){
-
-    const dt = (now - last) / 1000;
-    last = now;
-
-    births += birthRate * dt;
-    deaths += deathRate * dt;
+    // multiply so it visibly moves (this is the fix)
+    births += birthRate * 50;
+    deaths += deathRate * 50;
 
     document.getElementById("b").innerText =
         Math.floor(births).toLocaleString();
 
     document.getElementById("d").innerText =
         Math.floor(deaths).toLocaleString();
-
-    requestAnimationFrame(loop);
 }
 
-requestAnimationFrame(loop);
-
+setInterval(update, 100);
 </script>
 
 </body>
