@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Japan Population Flow</title>
+<title>Japan Population Dashboard</title>
 
 <style>
 body{
@@ -19,7 +19,7 @@ body{
     background:#f3f4f6;
     padding:30px;
     border-radius:16px;
-    width:420px;
+    width:440px;
     text-align:center;
     box-shadow:0 10px 25px rgba(0,0,0,0.1);
 }
@@ -30,12 +30,13 @@ h2{
 }
 
 .stat{
-    font-size:28px;
-    margin:12px 0;
+    font-size:26px;
+    margin:10px 0;
 }
 
-.birth{color:green;}
-.death{color:red;}
+.birth{color:#16a34a;}
+.death{color:#dc2626;}
+.net{color:#2563eb;}
 
 .desc{
     font-size:12px;
@@ -49,30 +50,27 @@ h2{
 <body>
 
 <div class="card">
-    <h2>Japan Population Flow (Realistic Model)</h2>
+    <h2>Japan Population Dashboard (Live Model)</h2>
 
     <div class="stat birth">Births: <span id="b">0</span></div>
     <div class="stat death">Deaths: <span id="d">0</span></div>
+    <div class="stat net">Net Change: <span id="n">0</span></div>
 
     <div class="desc">
-        Based on estimated yearly demographic data for Japan.
-        Births are lower than deaths, showing long-term population decline.
+        Based on annual demographic estimates. Deaths exceed births, leading to long-term population decline.
     </div>
 </div>
 
 <script>
-// REAL DATA (approx yearly)
 const birthsYear = 704000;
 const deathsYear = 1550000;
 
-// seconds in a year
 const secYear = 365 * 24 * 60 * 60;
 
-// real per-second rates
 const birthRate = birthsYear / secYear;
 const deathRate = deathsYear / secYear;
 
-// start at realistic year progress (so it’s not 0)
+// realistic starting values
 const now = new Date();
 const start = new Date(now.getFullYear(), 0, 1);
 const progress = (now - start) / (1000 * secYear);
@@ -89,11 +87,11 @@ function update(time){
     births += birthRate * dt;
     deaths += deathRate * dt;
 
-    document.getElementById("b").innerText =
-        Math.floor(births).toLocaleString();
+    const net = births - deaths;
 
-    document.getElementById("d").innerText =
-        Math.floor(deaths).toLocaleString();
+    document.getElementById("b").innerText = Math.floor(births).toLocaleString();
+    document.getElementById("d").innerText = Math.floor(deaths).toLocaleString();
+    document.getElementById("n").innerText = Math.floor(net).toLocaleString();
 
     requestAnimationFrame(update);
 }
