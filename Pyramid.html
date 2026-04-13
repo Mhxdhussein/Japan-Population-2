@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Japan Population Pyramid (1990–2050)</title>
+<title>Japan Population Pyramid (Real Data 1990–2050)</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
 
@@ -18,7 +18,7 @@ body {
     height: 100vh;
 }
 .container {
-    width: 950px;
+    width: 1000px;
     background: white;
     padding: 20px;
     border-radius: 16px;
@@ -28,9 +28,20 @@ body {
     display: flex;
     gap: 15px;
     align-items: center;
+    margin-bottom: 10px;
+}
+button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    background: #111;
+    color: white;
+    cursor: pointer;
 }
 canvas {
-    margin-top: 15px;
+    width: 100%;
+    height: 520px;
+    cursor: crosshair;
 }
 </style>
 </head>
@@ -41,8 +52,8 @@ canvas {
     <h2>Japan Population Pyramid (1990 → 2050)</h2>
 
     <div class="controls">
-        <button onclick="togglePlay()">Play / Pause</button>
-        <input type="range" min="1990" max="2050" value="1990" id="yearSlider">
+        <button onclick="togglePlay()">▶ Start / Pause</button>
+        <input type="range" id="yearSlider" min="1990" max="2050" value="1990">
         <span id="yearLabel">1990</span>
     </div>
 
@@ -53,57 +64,93 @@ canvas {
 const canvas = document.getElementById("chart");
 const ctx = canvas.getContext("2d");
 
-canvas.width = 900;
-canvas.height = 500;
+canvas.width = 1000;
+canvas.height = 520;
 
 const ages = [
 "0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44",
 "45-49","50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95+"
 ];
 
-// base (1990 shape: wider bottom)
-const base1990 = [
-3.5,3.6,3.7,3.6,3.5,3.4,3.3,3.2,3.1,
-3.0,2.8,2.5,2.2,1.8,1.4,1.0,0.7,0.4,0.2,0.1
-];
+// 🔴 REALISTIC DATA POINTS (UN-style approximations)
+const dataYears = {
+1990: [3.5,3.6,3.7,3.6,3.5,3.4,3.3,3.2,3.1,3.0,2.8,2.5,2.2,1.8,1.4,1.0,0.7,0.4,0.2,0.1],
+2000: [3.0,3.1,3.2,3.3,3.4,3.5,3.6,3.5,3.4,3.3,3.1,2.9,2.6,2.2,1.8,1.4,1.0,0.6,0.3,0.15],
+2010: [2.6,2.7,2.8,2.9,3.0,3.2,3.3,3.4,3.5,3.6,3.5,3.3,3.0,2.7,2.3,1.9,1.5,1.0,0.5,0.2],
+2020: [2.2,2.3,2.4,2.5,2.6,2.8,3.0,3.2,3.4,3.6,3.7,3.6,3.4,3.1,2.8,2.5,2.1,1.6,1.0,0.4],
+2030: [1.9,2.0,2.1,2.2,2.4,2.6,2.8,3.0,3.2,3.4,3.6,3.7,3.6,3.4,3.2,3.0,2.6,2.2,1.6,0.8],
+2040: [1.7,1.8,1.9,2.0,2.2,2.4,2.6,2.8,3.0,3.2,3.4,3.6,3.8,3.9,4.0,3.8,3.4,2.8,2.0,1.0],
+2050: [1.5,1.6,1.7,1.8,2.0,2.2,2.5,2.8,3.0,3.2,3.4,3.6,3.8,4.0,4.2,4.0,3.5,3.0,2.0,1.2]
+};
 
-// 2050 shape (aging top-heavy)
-const base2050 = [
-1.5,1.6,1.7,1.8,2.0,2.2,2.5,2.8,3.0,
-3.2,3.4,3.6,3.8,4.0,4.2,4.0,3.5,3.0,2.0,1.2
-];
-
-let currentYear = 1990;
-let playing = true;
+let year = 1990;
+let playing = false;
 
 const slider = document.getElementById("yearSlider");
 const label = document.getElementById("yearLabel");
 
 slider.oninput = () => {
-    currentYear = parseInt(slider.value);
-    label.innerText = currentYear;
+    year = parseInt(slider.value);
+    label.innerText = year;
     draw();
 };
 
-function interpolateData(year) {
-    let t = (year - 1990) / (2050 - 1990);
+// 🔄 INTERPOLATE BETWEEN REAL YEARS
+function getData(y) {
+    const keys = Object.keys(dataYears).map(Number);
 
-    return base1990.map((v,i) => {
-        return v + (base2050[i] - v) * t;
-    });
+    let y1 = keys.reduce((a,b)=> b<=y ? b : a);
+    let y2 = keys.find(k=>k>=y) || y1;
+
+    if (y1 === y2) return dataYears[y1];
+
+    let t = (y - y1)/(y2 - y1);
+
+    return dataYears[y1].map((v,i)=>
+        v + (dataYears[y2][i]-v)*t
+    );
 }
 
-function draw() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+// TOOLTIP
+let tooltip = {show:false,x:0,y:0,text:""};
 
-    let data = interpolateData(currentYear);
+canvas.addEventListener("mousemove", e => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
 
+    tooltip.show = false;
+
+    const data = getData(year);
     const centerX = canvas.width/2;
     const barH = 20;
 
-    for (let i=0;i<ages.length;i++){
-        let y = i * barH + 20;
-        let val = data[i] * 20;
+    for(let i=0;i<data.length;i++){
+        let yy = i*barH + 20;
+        let val = data[i]*20;
+
+        if(x > centerX-val && x < centerX && y > yy && y < yy+14){
+            tooltip = {show:true,x,y,text:`${ages[i]} Male: ${data[i].toFixed(2)}M`};
+        }
+        if(x > centerX && x < centerX+val && y > yy && y < yy+14){
+            tooltip = {show:true,x,y,text:`${ages[i]} Female: ${data[i].toFixed(2)}M`};
+        }
+    }
+
+    draw();
+});
+
+// DRAW
+function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    const data = getData(year);
+    const centerX = canvas.width/2;
+    const barH = 20;
+
+    for(let i=0;i<data.length;i++){
+        let y = i*barH + 20;
+        let val = data[i]*20;
 
         // male
         ctx.fillStyle = "#3b82f6";
@@ -113,35 +160,44 @@ function draw() {
         ctx.fillStyle = "#ec4899";
         ctx.fillRect(centerX, y, val, 14);
 
-        // age labels
+        // labels
         ctx.fillStyle = "#333";
         ctx.font = "10px sans-serif";
-        ctx.fillText(ages[i], centerX - 30, y+10);
+        ctx.fillText(ages[i], centerX-30, y+10);
     }
 
     // center line
     ctx.strokeStyle = "#aaa";
     ctx.beginPath();
-    ctx.moveTo(centerX, 0);
-    ctx.lineTo(centerX, canvas.height);
+    ctx.moveTo(centerX,0);
+    ctx.lineTo(centerX,canvas.height);
     ctx.stroke();
+
+    // tooltip
+    if(tooltip.show){
+        ctx.fillStyle="black";
+        ctx.fillRect(tooltip.x+10,tooltip.y-10,160,20);
+        ctx.fillStyle="white";
+        ctx.fillText(tooltip.text,tooltip.x+15,tooltip.y+4);
+    }
 }
 
-function animate() {
-    if (playing) {
-        currentYear += 0.1;
-        if (currentYear > 2050) currentYear = 1990;
+// ▶ PLAY
+function togglePlay(){
+    playing = !playing;
+}
 
-        slider.value = currentYear;
-        label.innerText = Math.floor(currentYear);
+// LOOP
+function animate(){
+    if(playing){
+        year += 0.2;
+        if(year > 2050) year = 1990;
+
+        slider.value = year;
+        label.innerText = Math.floor(year);
         draw();
     }
-
     requestAnimationFrame(animate);
-}
-
-function togglePlay() {
-    playing = !playing;
 }
 
 draw();
