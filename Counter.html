@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Japan Population Flow Counter</title>
+<title>Japan Population Flow</title>
 
 <style>
 body{
@@ -16,7 +16,7 @@ body{
     height:100vh;
 }
 
-.container{
+.card{
     background:#161a22;
     padding:30px;
     border-radius:16px;
@@ -28,7 +28,6 @@ body{
 h2{
     margin-bottom:20px;
     font-size:18px;
-    font-weight:700;
 }
 
 .stat{
@@ -36,72 +35,72 @@ h2{
     margin:18px 0;
 }
 
-.label{
-    font-size:14px;
-    opacity:0.7;
-    margin-bottom:5px;
-}
-
 .birth{color:#4ade80;}
 .death{color:#f87171;}
+
+.small{
+    opacity:0.6;
+    font-size:12px;
+    margin-top:10px;
+}
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="card">
     <h2>Japan Population Flow (Realistic Model)</h2>
 
-    <div>
-        <div class="label">Births per year (Japan avg)</div>
-        <div class="stat birth" id="births">0</div>
+    <div class="stat birth">
+        Births: <span id="b">0</span>
     </div>
 
-    <div>
-        <div class="label">Deaths per year (Japan avg)</div>
-        <div class="stat death" id="deaths">0</div>
+    <div class="stat death">
+        Deaths: <span id="d">0</span>
+    </div>
+
+    <div class="small">
+        Based on ~704k births & ~1.55M deaths yearly (UN/Japan stats trend)
     </div>
 </div>
 
 <script>
 
-// 🇯🇵 REALISTIC JAPAN DATA (recent UN / government estimates)
-const annualBirths = 770000;
-const annualDeaths = 1550000;
+// 🇯🇵 REALISTIC DATA
+const birthsYear = 704000;
+const deathsYear = 1550000;
 
-// seconds in a year
-const secondsYear = 365 * 24 * 60 * 60;
+// seconds in year
+const secYear = 365 * 24 * 60 * 60;
 
-// per-second flow rates
-const birthRate = annualBirths / secondsYear;
-const deathRate = annualDeaths / secondsYear;
+// per second flow
+const birthRate = birthsYear / secYear;
+const deathRate = deathsYear / secYear;
 
-// real counters (NO FAKE START VALUE)
+// counters
 let births = 0;
 let deaths = 0;
 
-// timing engine
-let lastTime = performance.now();
+// timing
+let last = performance.now();
 
-function update(now){
-    const delta = (now - lastTime) / 1000;
-    lastTime = now;
+function loop(now){
+    const dt = (now - last) / 1000;
+    last = now;
 
-    // continuous accumulation (no reset possible)
-    births += birthRate * delta;
-    deaths += deathRate * delta;
+    births += birthRate * dt;
+    deaths += deathRate * dt;
 
-    document.getElementById("births").innerText =
+    document.getElementById("b").innerText =
         Math.floor(births).toLocaleString();
 
-    document.getElementById("deaths").innerText =
+    document.getElementById("d").innerText =
         Math.floor(deaths).toLocaleString();
 
-    requestAnimationFrame(update);
+    requestAnimationFrame(loop);
 }
 
-// start loop
-requestAnimationFrame(update);
+requestAnimationFrame(loop);
 
 </script>
 
