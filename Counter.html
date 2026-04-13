@@ -8,12 +8,11 @@
 body{
     margin:0;
     background:white;
-    font-family:Arial, sans-serif;
+    font-family:Arial;
     display:flex;
     justify-content:center;
     align-items:center;
     height:100vh;
-    color:#111;
 }
 
 .card{
@@ -31,12 +30,12 @@ h2{
 }
 
 .stat{
-    font-size:24px;
+    font-size:26px;
     margin:15px 0;
 }
 
-.birth{color:#16a34a;}
-.death{color:#dc2626;}
+.birth{color:green;}
+.death{color:red;}
 
 .small{
     font-size:12px;
@@ -49,53 +48,39 @@ h2{
 <body>
 
 <div class="card">
-    <h2>Japan Population Flow (Live Model)</h2>
+    <h2>Japan Population Flow</h2>
 
-    <div class="stat birth">
-        Births: <span id="b">0</span>
-    </div>
+    <div class="stat birth">Births: <span id="b">0</span></div>
+    <div class="stat death">Deaths: <span id="d">0</span></div>
 
-    <div class="stat death">
-        Deaths: <span id="d">0</span>
-    </div>
-
-    <div class="small">
-        Estimated yearly trend model
-    </div>
+    <div class="small">Live estimated model</div>
 </div>
 
 <script>
-// REAL DATA (approx yearly)
+window.onload = function(){
+
 const birthsYear = 704000;
 const deathsYear = 1550000;
 
-// seconds in a year
 const secYear = 365 * 24 * 60 * 60;
 
-// per second rates
 const birthRate = birthsYear / secYear;
 const deathRate = deathsYear / secYear;
 
-// start at realistic visible values (not 0)
-let births = 500000;
-let deaths = 1100000;
+// start from realistic base numbers
+let births = 700000;
+let deaths = 1500000;
 
-let last = performance.now();
-
-function loop(time){
-    const dt = (time - last) / 1000;
-    last = time;
-
-    births += birthRate * dt;
-    deaths += deathRate * dt;
+function update(){
+    births += birthRate * 1;
+    deaths += deathRate * 1;
 
     document.getElementById("b").innerText = Math.floor(births).toLocaleString();
     document.getElementById("d").innerText = Math.floor(deaths).toLocaleString();
-
-    requestAnimationFrame(loop);
 }
 
-requestAnimationFrame(loop);
+setInterval(update, 100);
+};
 </script>
 
 </body>
