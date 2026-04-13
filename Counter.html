@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Japan Population, Birth & Death Rates (Live View)</title>
+  <title>Japan Population Dashboard (Easy View)</title>
   <style>
     :root {
       --bg: #0b1220;
@@ -244,33 +244,32 @@
 <body>
   <main class="container">
     <section class="topbar">
-      <div class="brand">Japan Live Demographics</div>
+      <div class="brand">Japan Live Population</div>
       <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch theme">
         Switch to Light Theme
       </button>
     </section>
 
     <section class="header">
-      <p class="section-title">Live Country Dashboard</p>
-      <h1>Japan Demographics Dashboard</h1>
+      <p class="section-title">Live Country Data</p>
+      <h1>Japan Population Dashboard</h1>
       <p class="subtitle">
-        Organized live view of Japan's estimated current population and latest available
-        official birth/death rates, pulled from World Bank indicators.
+        This page shows simple live facts about Japan's population.
       </p>
-      <p class="meta-line">Country code: <strong>JPN</strong> | Rates are official annual indicators</p>
+      <p class="meta-line">Country code: <strong>JPN</strong> | Data comes from official yearly reports</p>
     </section>
 
     <div id="errorBox" class="error"></div>
 
     <section class="hero-grid">
       <article class="hero-stat">
-        <div class="label">Estimated Current Population</div>
+        <div class="label">People Living in Japan (Estimate Right Now)</div>
         <div id="populationNow" class="value">Loading...</div>
         <div class="note" id="populationBase"></div>
       </article>
 
       <article class="card">
-        <h2>Live Trend Signal</h2>
+        <h2>Population Trend</h2>
         <p id="trendText" class="subtitle">Loading trend...</p>
         <p style="margin-top:10px">
           <span id="trendPill" class="pill">Checking...</span>
@@ -279,22 +278,22 @@
     </section>
 
     <section>
-      <p class="section-title">Core Indicators</p>
+      <p class="section-title">Main Numbers</p>
       <div class="kpi-grid">
       <article class="stat">
-        <div class="label">Birth Rate (Crude, per 1,000 people)</div>
+        <div class="label">Birth Rate (How many babies are born each year per 1,000 people)</div>
         <div id="birthRate" class="value">Loading...</div>
         <div class="note" id="birthYear"></div>
       </article>
 
       <article class="stat">
-        <div class="label">Death Rate (Crude, per 1,000 people)</div>
+        <div class="label">Death Rate (How many people die each year per 1,000 people)</div>
         <div id="deathRate" class="value">Loading...</div>
         <div class="note" id="deathYear"></div>
       </article>
 
       <article class="stat">
-        <div class="label">Population Growth Rate (annual %)</div>
+        <div class="label">Population Change (Yearly %)</div>
         <div id="growthRate" class="value">Loading...</div>
         <div class="note" id="growthYear"></div>
       </article>
@@ -302,14 +301,14 @@
     </section>
 
     <section>
-      <p class="section-title">Details & Guidance</p>
+      <p class="section-title">Extra Help</p>
       <div class="row">
       <article class="card">
-        <h2>Data Quality Notes</h2>
+        <h2>What This Means</h2>
         <ul>
-          <li>Rates are official yearly indicators, not second-by-second census data.</li>
-          <li>"Live population" is a real-time estimate from the latest annual growth rate.</li>
-          <li>Japan code used for all queries: <strong>JPN</strong>.</li>
+          <li>The rates are based on official yearly reports.</li>
+          <li>The "live population" number is an estimate that updates every second.</li>
+          <li>All data on this page is for Japan (<strong>JPN</strong>).</li>
         </ul>
       </article>
 
@@ -326,7 +325,7 @@
     </section>
 
     <section class="card">
-      <p class="section-title">Verification Links</p>
+      <p class="section-title">Source Links</p>
       <h2>Sources</h2>
       <ul>
         <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.POP.TOTL?format=json" target="_blank" rel="noopener noreferrer">World Bank: Total Population</a></li>
@@ -434,18 +433,18 @@
       const isNearFlat = Math.abs(growthRate) < 0.1;
 
       if (isDeclining) {
-        els.trendPill.textContent = "Population is shrinking";
+        els.trendPill.textContent = "Population is going down";
         els.trendPill.className = "pill delta-down";
       } else if (isNearFlat) {
-        els.trendPill.textContent = "Population is nearly stable";
+        els.trendPill.textContent = "Population is staying almost the same";
         els.trendPill.className = "pill delta-flat";
       } else {
-        els.trendPill.textContent = "Population is growing";
+        els.trendPill.textContent = "Population is going up";
         els.trendPill.className = "pill delta-up";
       }
 
       const sign = naturalDelta > 0 ? "+" : "";
-      els.trendText.textContent = `Natural change (birth minus death) is ${sign}${fmtRate.format(naturalDelta)} per 1,000 people.`;
+      els.trendText.textContent = `Births minus deaths is ${sign}${fmtRate.format(naturalDelta)} for every 1,000 people.`;
     }
 
     async function loadJapanData() {
@@ -461,19 +460,19 @@
         yearlyGrowthPercent = growth.value;
         baseTimestamp = new Date(`${pop.year}-12-31T23:59:59Z`).getTime();
 
-        els.populationBase.textContent = `Base: ${fmtInt.format(pop.value)} (${pop.year})`;
+        els.populationBase.textContent = `Starting number: ${fmtInt.format(pop.value)} (${pop.year})`;
         els.birthRate.textContent = fmtRate.format(birth.value);
-        els.birthYear.textContent = `Latest year: ${birth.year}`;
+        els.birthYear.textContent = `Most recent year: ${birth.year}`;
         els.deathRate.textContent = fmtRate.format(death.value);
-        els.deathYear.textContent = `Latest year: ${death.year}`;
+        els.deathYear.textContent = `Most recent year: ${death.year}`;
         els.growthRate.textContent = `${growth.value >= 0 ? "+" : ""}${fmtRate.format(growth.value)}%`;
-        els.growthYear.textContent = `Latest year: ${growth.year}`;
+        els.growthYear.textContent = `Most recent year: ${growth.year}`;
 
         setTrend(birth.value, death.value, growth.value);
         updateLivePopulation();
         setInterval(updateLivePopulation, 1000);
 
-        els.lastRefresh.textContent = `Last refreshed: ${new Date().toLocaleString()}`;
+        els.lastRefresh.textContent = `Last updated: ${new Date().toLocaleString()}`;
       } catch (err) {
         showError("Could not load live data. Please check your internet connection and try again.");
         console.error(err);
