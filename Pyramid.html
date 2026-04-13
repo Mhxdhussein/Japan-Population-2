@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Japan 2026 Population Pyramid</title>
+<title>Interactive Japan Population Pyramid</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
 
@@ -21,8 +21,8 @@ body {
 .container {
     width: 900px;
     background: white;
-    border-radius: 18px;
     padding: 20px;
+    border-radius: 16px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.1);
 }
 
@@ -32,23 +32,23 @@ body {
     align-items: center;
 }
 
-h2 {
-    margin: 0;
-}
-
-button {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    background: #111;
-    color: white;
+.controls {
+    margin-top: 10px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
 }
 
 canvas {
-    margin-top: 20px;
+    margin-top: 15px;
     width: 100%;
     height: 500px;
+    cursor: crosshair;
+}
+
+label {
+    font-size: 12px;
+    color: #555;
 }
 </style>
 </head>
@@ -56,9 +56,24 @@ canvas {
 <body>
 
 <div class="container">
+
     <div class="header">
-        <h2>Japan Population Pyramid (2026)</h2>
-        <button onclick="toggleDark()">Dark Mode</button>
+        <h2>Japan Population Pyramid (Interactive)</h2>
+    </div>
+
+    <div class="controls">
+        <label>Year: <span id="yearLabel">2026</span></label>
+        <input type="range" min="2020" max="2035" value="2026" id="yearSlider">
+
+        <label>
+            <input type="checkbox" id="toggleMale" checked>
+            Male
+        </label>
+
+        <label>
+            <input type="checkbox" id="toggleFemale" checked>
+            Female
+        </label>
     </div>
 
     <canvas id="chart"></canvas>
@@ -71,48 +86,103 @@ const ctx = canvas.getContext("2d");
 canvas.width = 900;
 canvas.height = 500;
 
-// AGE GROUPS (0 → 100+)
 const ages = [
 "0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44",
 "45-49","50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99","100+"
 ];
 
-// 🇯🇵 APPROX JAPAN 2026 POPULATION DISTRIBUTION (millions)
-const male = [
-2.0,2.2,2.4,2.6,2.8,3.1,3.4,3.6,3.8,
-3.7,3.5,3.3,3.0,2.7,2.4,2.0,1.5,1.0,0.5,0.2,0.05
-];
+// base 2026 data
+const baseMale = [2.0,2.2,2.4,2.6,2.8,3.1,3.4,3.6,3.8,3.7,3.5,3.3,3.0,2.7,2.4,2.0,1.5,1.0,0.5,0.2,0.05];
+const baseFemale = [1.9,2.1,2.3,2.5,2.7,3.0,3.3,3.5,3.7,3.8,3.7,3.5,3.2,3.0,2.8,2.6,2.2,1.7,1.2,0.6,0.1];
 
-const female = [
-1.9,2.1,2.3,2.5,2.7,3.0,3.3,3.5,3.7,
-3.8,3.7,3.5,3.2,3.0,2.8,2.6,2.2,1.7,1.2,0.6,0.1
-];
+let year = 2026;
+
+const slider = document.getElementById("yearSlider");
+const yearLabel = document.getElementById("yearLabel");
+
+slider.oninput = () => {
+    year = parseInt(slider.value);
+    yearLabel.innerText = year;
+    draw();
+};
+
+const toggleMale = document.getElementById("toggleMale");
+const toggleFemale = document.getElementById("toggleFemale");
+
+toggleMale.onchange = draw;
+toggleFemale.onchange = draw;
+
+// simulate change over time (aging + decline)
+function transformData(base, shift) {
+    return base.map((v, i) => {
+        let aging = i < 10 ? -shift * 0.03 : shift * 0.02;
+        return Math.max(0.05, v + aging);
+    });
+}
+
+let tooltip = {x:0,y:0,text:"",show:false};
+
+canvas.addEventListener("mousemove", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    tooltip.show = false;
+
+    const centerX = canvas.width/2;
+    const barH = 18;
+
+    let mData = transformData(baseMale, year - 2026);
+    let fData = transformData(baseFemale, year - 2026);
+
+    for (let i=0;i<ages.length;i++){
+        let yy = i * barH + 20;
+
+        let m = mData[i] * 20;
+        let f = fData[i] * 20;
+
+        // male hover
+        if (toggleMale.checked && x < centerX && x > centerX - m && y > yy && y < yy+12) {
+            tooltip = {x,y,text:`${ages[i]} Male: ${mData[i].toFixed(2)}M`,show:true};
+        }
+
+        // female hover
+        if (toggleFemale.checked && x > centerX && x < centerX + f && y > yy && y < yy+12) {
+            tooltip = {x,y,text:`${ages[i]} Female: ${fData[i].toFixed(2)}M`,show:true};
+        }
+    }
+
+    draw();
+});
 
 function draw() {
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    const centerX = canvas.width / 2;
-    const barHeight = 18;
+    const centerX = canvas.width/2;
+    const barH = 18;
 
-    for (let i = 0; i < ages.length; i++) {
-        let y = i * barHeight + 20;
+    let mData = transformData(baseMale, year - 2026);
+    let fData = transformData(baseFemale, year - 2026);
 
-        // scale
-        let m = male[i] * 20;
-        let f = female[i] * 20;
+    for (let i=0;i<ages.length;i++){
+        let y = i * barH + 20;
 
-        // MALE (left)
-        ctx.fillStyle = "#3b82f6";
-        ctx.fillRect(centerX - m, y, m, 12);
+        let m = mData[i] * 20;
+        let f = fData[i] * 20;
 
-        // FEMALE (right)
-        ctx.fillStyle = "#ec4899";
-        ctx.fillRect(centerX, y, f, 12);
-
-        // labels
-        ctx.fillStyle = "#333";
         ctx.font = "10px sans-serif";
+        ctx.fillStyle = "#444";
         ctx.fillText(ages[i], centerX - 25, y + 10);
+
+        if (toggleMale.checked) {
+            ctx.fillStyle = "#3b82f6";
+            ctx.fillRect(centerX - m, y, m, 12);
+        }
+
+        if (toggleFemale.checked) {
+            ctx.fillStyle = "#ec4899";
+            ctx.fillRect(centerX, y, f, 12);
+        }
     }
 
     // center line
@@ -121,17 +191,17 @@ function draw() {
     ctx.moveTo(centerX, 0);
     ctx.lineTo(centerX, canvas.height);
     ctx.stroke();
+
+    // tooltip
+    if (tooltip.show) {
+        ctx.fillStyle = "black";
+        ctx.fillRect(tooltip.x+10, tooltip.y-10, 140, 20);
+        ctx.fillStyle = "white";
+        ctx.fillText(tooltip.text, tooltip.x+15, tooltip.y+3);
+    }
 }
 
 draw();
-
-function toggleDark() {
-    if (document.body.style.background === "black") {
-        document.body.style.background = "#f5f7fa";
-    } else {
-        document.body.style.background = "black";
-    }
-}
 </script>
 
 </body>
