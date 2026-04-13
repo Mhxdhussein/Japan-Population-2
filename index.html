@@ -1,202 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Japan Population Pyramid (1990–2050)</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Japan Population Pyramid (1950-2050)</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --border: #334155;
+      --accent: #60a5fa;
+    }
 
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    * { box-sizing: border-box; }
 
-<style>
-:root {
-    --bg: #0f1115;
-    --card: #161a22;
-    --text: #e6e6e6;
-    --male: #4c78a8;
-    --female: #b56576;
-    --grid: rgba(255,255,255,0.08);
-}
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: linear-gradient(180deg, #0b1220 0%, #0f172a 100%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
 
-body.light {
-    --bg: #f4f6f8;
-    --card: #ffffff;
-    --text: #111;
-    --male: #3b82f6;
-    --female: #ec4899;
-    --grid: rgba(0,0,0,0.08);
-}
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: grid;
+      gap: 14px;
+    }
 
-body {
-    margin: 0;
-    font-family: "Noto Sans JP", sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    transition: 0.3s;
-}
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+    }
 
-.container {
-    width: 1000px;
-    background: var(--card);
-    padding: 20px;
-    border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-}
+    h1 { margin: 0 0 8px; }
+    p { margin: 0; color: var(--muted); }
 
-.controls {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    margin-bottom: 10px;
-}
+    .controls {
+      display: grid;
+      grid-template-columns: auto auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+      margin-top: 14px;
+    }
 
-button {
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    background: #222;
-    color: white;
-}
+    button, select {
+      border: 1px solid var(--border);
+      background: #1f2937;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
 
-input[type="range"] {
-    width: 250px;
-}
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
 
-canvas {
-    width: 100%;
-    height: 520px;
-}
-</style>
+    .year-label {
+      font-weight: 700;
+      min-width: 90px;
+      text-align: right;
+    }
+
+    .frame-wrap {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    iframe {
+      width: 100%;
+      height: 560px;
+      border: 0;
+      display: block;
+    }
+
+    @media (max-width: 760px) {
+      .controls { grid-template-columns: 1fr; }
+      .year-label { text-align: left; }
+    }
+  </style>
 </head>
-
 <body>
+  <main class="container">
+    <section class="card">
+      <h1>Japan Population Pyramid</h1>
+      <p>Interactive years: 1950-2050 (source: PopulationPyramid.net).</p>
 
-<div class="container">
+      <div class="controls">
+        <button id="playBtn" type="button">Play</button>
+        <select id="speedSelect" aria-label="Animation speed">
+          <option value="1300">Slow</option>
+          <option value="800" selected>Normal</option>
+          <option value="450">Fast</option>
+        </select>
+        <input id="yearSlider" type="range" min="1950" max="2050" value="2025" step="1" />
+        <span id="yearLabel" class="year-label">Year: 2025</span>
+      </div>
+    </section>
 
-    <h2>Japan Population Pyramid (1990 → 2050)</h2>
+    <section class="frame-wrap">
+      <iframe
+        id="pyramidFrame"
+        title="Japan Population Pyramid"
+        src="https://www.populationpyramid.net/japan/2025/"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+      ></iframe>
+    </section>
+  </main>
 
-    <div class="controls">
-        <button onclick="togglePlay()">▶ Play</button>
-        <button onclick="toggleTheme()">Dark/Light</button>
+  <script>
+    const playBtn = document.getElementById("playBtn");
+    const speedSelect = document.getElementById("speedSelect");
+    const yearSlider = document.getElementById("yearSlider");
+    const yearLabel = document.getElementById("yearLabel");
+    const pyramidFrame = document.getElementById("pyramidFrame");
+    let timer = null;
 
-        <input type="range" id="slider" min="1990" max="2050" value="1990">
-        <span id="yearLabel">1990</span>
-    </div>
-
-    <canvas id="chart"></canvas>
-</div>
-
-<script>
-const canvas = document.getElementById("chart");
-const ctx = canvas.getContext("2d");
-
-canvas.width = 1000;
-canvas.height = 520;
-
-const ages = [
-"0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44",
-"45-49","50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95+"
-];
-
-// REALISTIC JAPAN TREND STRUCTURE (UN-style progression)
-const data = {
-1990:[3.5,3.6,3.7,3.6,3.5,3.4,3.3,3.2,3.1,3.0,2.8,2.5,2.2,1.8,1.4,1.0,0.7,0.4,0.2,0.1],
-2000:[3.0,3.1,3.2,3.3,3.4,3.5,3.6,3.5,3.4,3.3,3.1,2.9,2.6,2.2,1.8,1.4,1.0,0.6,0.3,0.15],
-2010:[2.6,2.7,2.8,2.9,3.0,3.2,3.3,3.4,3.5,3.6,3.5,3.3,3.0,2.7,2.3,1.9,1.5,1.0,0.5,0.2],
-2020:[2.2,2.3,2.4,2.5,2.6,2.8,3.0,3.2,3.4,3.6,3.7,3.6,3.4,3.1,2.8,2.5,2.1,1.6,1.0,0.4],
-2030:[1.9,2.0,2.1,2.2,2.4,2.6,2.8,3.0,3.2,3.4,3.6,3.7,3.6,3.4,3.2,3.0,2.6,2.2,1.6,0.8],
-2040:[1.7,1.8,1.9,2.0,2.2,2.4,2.6,2.8,3.0,3.2,3.4,3.6,3.8,3.9,4.0,3.8,3.4,2.8,2.0,1.0],
-2050:[1.5,1.6,1.7,1.8,2.0,2.2,2.5,2.8,3.0,3.2,3.4,3.6,3.8,4.0,4.2,4.0,3.5,3.0,2.0,1.2]
-};
-
-let year = 1990;
-let playing = true;
-
-const slider = document.getElementById("slider");
-const label = document.getElementById("yearLabel");
-
-slider.oninput = () => {
-    year = +slider.value;
-    label.innerText = year;
-};
-
-function interpolate(y){
-    const keys = Object.keys(data).map(Number);
-
-    let y1 = keys.reduce((a,b)=>b<=y?b:a);
-    let y2 = keys.find(k=>k>=y)||y1;
-
-    if(y1===y2) return data[y1];
-
-    let t = (y-y1)/(y2-y1);
-
-    return data[y1].map((v,i)=>
-        v+(data[y2][i]-v)*t
-    );
-}
-
-function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    const d = interpolate(year);
-    const center = canvas.width/2;
-    const barH = 20;
-
-    for(let i=0;i<d.length;i++){
-        let y = i*barH + 20;
-
-        // 🔥 animation pulse (emphasize movement)
-        let pulse = 1 + Math.sin((year*0.05)+i)*0.05;
-        let val = d[i]*22*pulse;
-
-        // male (left)
-        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--male');
-        ctx.fillRect(center - val, y, val, 14);
-
-        // female (right)
-        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--female');
-        ctx.fillRect(center, y, val, 14);
-
-        // labels
-        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text');
-        ctx.font = "10px sans-serif";
-        ctx.fillText(ages[i], center-30, y+10);
+    function setYear(year) {
+      const safeYear = Math.min(2050, Math.max(1950, Number(year)));
+      const url = `https://www.populationpyramid.net/japan/${safeYear}/`;
+      if (pyramidFrame.src !== url) pyramidFrame.src = url;
+      yearSlider.value = String(safeYear);
+      yearLabel.textContent = `Year: ${safeYear}`;
     }
 
-    // center line
-    ctx.strokeStyle = "rgba(255,255,255,0.2)";
-    ctx.beginPath();
-    ctx.moveTo(center,0);
-    ctx.lineTo(center,canvas.height);
-    ctx.stroke();
-}
-
-function loop(){
-    if(playing){
-        year += 0.15;
-        if(year>2050) year = 1990;
-
-        slider.value = year;
-        label.innerText = Math.floor(year);
+    function stopAnimation() {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+      playBtn.textContent = "Play";
     }
-    draw();
-    requestAnimationFrame(loop);
-}
 
-function togglePlay(){
-    playing = !playing;
-}
+    function startAnimation() {
+      stopAnimation();
+      playBtn.textContent = "Pause";
+      timer = setInterval(() => {
+        const currentYear = Number(yearSlider.value);
+        const nextYear = currentYear >= 2050 ? 1950 : currentYear + 1;
+        setYear(nextYear);
+      }, Number(speedSelect.value));
+    }
 
-function toggleTheme(){
-    document.body.classList.toggle("light");
-}
+    playBtn.addEventListener("click", () => {
+      if (timer) stopAnimation();
+      else startAnimation();
+    });
 
-loop();
-</script>
+    yearSlider.addEventListener("input", (event) => setYear(event.target.value));
+    speedSelect.addEventListener("change", () => {
+      if (timer) startAnimation();
+    });
 
+    setYear(2025);
+  </script>
 </body>
 </html>
