@@ -54,12 +54,10 @@
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1160px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: 260px 1fr;
-      gap: 16px;
-      align-items: start;
+      gap: 14px;
     }
 
     .topbar,
@@ -92,34 +90,6 @@
       padding: 12px 16px;
     }
 
-    .sidebar {
-      position: sticky;
-      top: 24px;
-      display: grid;
-      gap: 12px;
-    }
-
-    .sidebar .card {
-      padding: 14px;
-    }
-
-    .sidebar h3 {
-      margin: 0 0 8px;
-      font-size: 0.95rem;
-    }
-
-    .sidebar p {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.45;
-      font-size: 0.9rem;
-    }
-
-    .main {
-      display: grid;
-      gap: 16px;
-    }
-
     .brand {
       font-weight: 700;
       letter-spacing: 0.2px;
@@ -137,6 +107,12 @@
       gap: 14px;
     }
 
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
     .hero-stat {
       background: var(--stat);
       border: 1px solid var(--border);
@@ -148,12 +124,6 @@
     .hero-stat .value {
       font-size: 2.2rem;
       margin-bottom: 8px;
-    }
-
-    .content-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
     }
 
     .stat {
@@ -186,6 +156,24 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 14px;
+    }
+
+    .section-title {
+      margin: 0 0 2px;
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .header h1 {
+      margin-bottom: 6px;
+    }
+
+    .meta-line {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.86rem;
     }
 
     .pill {
@@ -236,16 +224,6 @@
       transform: translateY(-1px);
     }
 
-    @media (max-width: 1020px) {
-      .container {
-        grid-template-columns: 1fr;
-      }
-
-      .sidebar {
-        position: static;
-      }
-    }
-
     @media (max-width: 740px) {
       .topbar {
         flex-direction: column;
@@ -256,11 +234,8 @@
         grid-template-columns: 1fr;
       }
 
+      .kpi-grid,
       .row {
-        grid-template-columns: 1fr;
-      }
-
-      .content-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -268,100 +243,98 @@
 </head>
 <body>
   <main class="container">
-    <aside class="sidebar">
-      <section class="topbar">
-        <div class="brand">Japan Live Demographics</div>
-        <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch theme">
-          Switch to Light Theme
-        </button>
-      </section>
+    <section class="topbar">
+      <div class="brand">Japan Live Demographics</div>
+      <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch theme">
+        Switch to Light Theme
+      </button>
+    </section>
 
-      <article class="card">
-        <h3>Overview</h3>
-        <p>Real-time estimate panel based on official indicators from World Bank (country code: JPN).</p>
+    <section class="header">
+      <p class="section-title">Live Country Dashboard</p>
+      <h1>Japan Demographics Dashboard</h1>
+      <p class="subtitle">
+        Organized live view of Japan's estimated current population and latest available
+        official birth/death rates, pulled from World Bank indicators.
+      </p>
+      <p class="meta-line">Country code: <strong>JPN</strong> | Rates are official annual indicators</p>
+    </section>
+
+    <div id="errorBox" class="error"></div>
+
+    <section class="hero-grid">
+      <article class="hero-stat">
+        <div class="label">Estimated Current Population</div>
+        <div id="populationNow" class="value">Loading...</div>
+        <div class="note" id="populationBase"></div>
       </article>
 
       <article class="card">
-        <h3>Quick Access</h3>
-        <p>
-          <a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.POP.TOTL?format=json" target="_blank" rel="noopener noreferrer">Population</a><br />
-          <a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.DYN.CBRT.IN?format=json" target="_blank" rel="noopener noreferrer">Birth Rate</a><br />
-          <a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.DYN.CDRT.IN?format=json" target="_blank" rel="noopener noreferrer">Death Rate</a>
+        <h2>Live Trend Signal</h2>
+        <p id="trendText" class="subtitle">Loading trend...</p>
+        <p style="margin-top:10px">
+          <span id="trendPill" class="pill">Checking...</span>
         </p>
       </article>
+    </section>
+
+    <section>
+      <p class="section-title">Core Indicators</p>
+      <div class="kpi-grid">
+      <article class="stat">
+        <div class="label">Birth Rate (Crude, per 1,000 people)</div>
+        <div id="birthRate" class="value">Loading...</div>
+        <div class="note" id="birthYear"></div>
+      </article>
+
+      <article class="stat">
+        <div class="label">Death Rate (Crude, per 1,000 people)</div>
+        <div id="deathRate" class="value">Loading...</div>
+        <div class="note" id="deathYear"></div>
+      </article>
+
+      <article class="stat">
+        <div class="label">Population Growth Rate (annual %)</div>
+        <div id="growthRate" class="value">Loading...</div>
+        <div class="note" id="growthYear"></div>
+      </article>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-title">Details & Guidance</p>
+      <div class="row">
+      <article class="card">
+        <h2>Data Quality Notes</h2>
+        <ul>
+          <li>Rates are official yearly indicators, not second-by-second census data.</li>
+          <li>"Live population" is a real-time estimate from the latest annual growth rate.</li>
+          <li>Japan code used for all queries: <strong>JPN</strong>.</li>
+        </ul>
+      </article>
 
       <article class="card">
-        <h3>Refresh</h3>
-        <p id="lastRefresh"></p>
+        <h2>How To Take The Code</h2>
+        <ul>
+          <li>Open `index.html` in your editor.</li>
+          <li>Select all (`Cmd + A`) and copy (`Cmd + C`).</li>
+          <li>Paste into any new `.html` file or your project file.</li>
+          <li>You can also right-click the file and duplicate/share it directly.</li>
+        </ul>
       </article>
-    </aside>
+      </div>
+    </section>
 
-    <section class="main">
-      <section class="header">
-        <h1>Japan Demographics Dashboard</h1>
-        <p class="subtitle">
-          Same information, redesigned layout with clearer structure and easier scanning.
-        </p>
-      </section>
-
-      <div id="errorBox" class="error"></div>
-
-      <section class="hero-grid">
-        <article class="hero-stat">
-          <div class="label">Estimated Current Population</div>
-          <div id="populationNow" class="value">Loading...</div>
-          <div class="note" id="populationBase"></div>
-        </article>
-
-        <article class="card">
-          <h2>Live Trend Signal</h2>
-          <p id="trendText" class="subtitle">Loading trend...</p>
-          <p style="margin-top:10px">
-            <span id="trendPill" class="pill">Checking...</span>
-          </p>
-        </article>
-      </section>
-
-      <section class="stats">
-        <article class="stat">
-          <div class="label">Birth Rate (Crude, per 1,000 people)</div>
-          <div id="birthRate" class="value">Loading...</div>
-          <div class="note" id="birthYear"></div>
-        </article>
-
-        <article class="stat">
-          <div class="label">Death Rate (Crude, per 1,000 people)</div>
-          <div id="deathRate" class="value">Loading...</div>
-          <div class="note" id="deathYear"></div>
-        </article>
-
-        <article class="stat">
-          <div class="label">Population Growth Rate (annual %)</div>
-          <div id="growthRate" class="value">Loading...</div>
-          <div class="note" id="growthYear"></div>
-        </article>
-      </section>
-
-      <section class="content-grid">
-        <article class="card">
-          <h2>Data Quality Notes</h2>
-          <ul>
-            <li>Rates are official yearly indicators, not second-by-second census data.</li>
-            <li>"Live population" is a real-time estimate from the latest annual growth rate.</li>
-            <li>Japan code used for all queries: <strong>JPN</strong>.</li>
-          </ul>
-        </article>
-
-        <article class="card">
-          <h2>Sources</h2>
-          <ul>
-            <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.POP.TOTL?format=json" target="_blank" rel="noopener noreferrer">World Bank: Total Population</a></li>
-            <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.DYN.CBRT.IN?format=json" target="_blank" rel="noopener noreferrer">World Bank: Birth Rate</a></li>
-            <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.DYN.CDRT.IN?format=json" target="_blank" rel="noopener noreferrer">World Bank: Death Rate</a></li>
-            <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.POP.GROW?format=json" target="_blank" rel="noopener noreferrer">World Bank: Population Growth Rate</a></li>
-          </ul>
-        </article>
-      </section>
+    <section class="card">
+      <p class="section-title">Verification Links</p>
+      <h2>Sources</h2>
+      <ul>
+        <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.POP.TOTL?format=json" target="_blank" rel="noopener noreferrer">World Bank: Total Population</a></li>
+        <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.DYN.CBRT.IN?format=json" target="_blank" rel="noopener noreferrer">World Bank: Birth Rate</a></li>
+        <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.DYN.CDRT.IN?format=json" target="_blank" rel="noopener noreferrer">World Bank: Death Rate</a></li>
+        <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.POP.GROW?format=json" target="_blank" rel="noopener noreferrer">World Bank: Population Growth Rate</a></li>
+      </ul>
+      <p class="note" id="lastRefresh" style="margin-top:12px"></p>
     </section>
   </main>
 
