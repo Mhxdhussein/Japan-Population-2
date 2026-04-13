@@ -7,8 +7,8 @@
 <style>
 body{
     margin:0;
-    background:#0f1115;
-    color:white;
+    background:white;
+    color:#111;
     font-family:Arial, sans-serif;
     display:flex;
     justify-content:center;
@@ -17,12 +17,12 @@ body{
 }
 
 .card{
-    background:#161a22;
+    background:#f5f5f5;
     padding:30px;
     border-radius:16px;
     width:420px;
     text-align:center;
-    box-shadow:0 10px 40px rgba(0,0,0,0.5);
+    box-shadow:0 10px 25px rgba(0,0,0,0.1);
 }
 
 h2{
@@ -35,8 +35,8 @@ h2{
     margin:18px 0;
 }
 
-.birth{color:#4ade80;}
-.death{color:#f87171;}
+.birth{color:#16a34a;}
+.death{color:#dc2626;}
 
 .small{
     opacity:0.7;
@@ -49,7 +49,7 @@ h2{
 <body>
 
 <div class="card">
-    <h2>Japan Population Flow (Realistic Model)</h2>
+    <h2>Japan Population Flow (Live Model)</h2>
 
     <div class="stat birth">
         Births: <span id="b">0</span>
@@ -60,37 +60,48 @@ h2{
     </div>
 
     <div class="small">
-        Based on ~704k births & ~1.55M deaths yearly (trend estimate)
+        Based on ~704k births & ~1.55M deaths yearly trend
     </div>
-
-    <small id="status">Starting...</small>
 </div>
 
 <script>
-document.getElementById("status").innerText = "JS running ✔";
-
+/*
+REALISTIC ANNUAL DATA (approx)
+*/
 const birthsYear = 704000;
 const deathsYear = 1550000;
 
 const secYear = 365 * 24 * 60 * 60;
 
+// per-second rate
 const birthRate = birthsYear / secYear;
 const deathRate = deathsYear / secYear;
 
-let births = 0;
-let deaths = 0;
+/*
+🔥 FIX: start from YEAR-TO-DATE estimate instead of 0
+*/
+const now = new Date();
+const start = new Date(now.getFullYear(), 0, 1);
+
+const yearProgress = (now - start) / (1000 * secYear);
+
+let births = birthsYear * yearProgress;
+let deaths = deathsYear * yearProgress;
 
 let last = performance.now();
 
-function loop(now){
-    const dt = (now - last) / 1000;
-    last = now;
+function loop(nowTime){
+    const dt = (nowTime - last) / 1000;
+    last = nowTime;
 
     births += birthRate * dt;
     deaths += deathRate * dt;
 
-    document.getElementById("b").innerText = Math.floor(births).toLocaleString();
-    document.getElementById("d").innerText = Math.floor(deaths).toLocaleString();
+    document.getElementById("b").innerText =
+        Math.floor(births).toLocaleString();
+
+    document.getElementById("d").innerText =
+        Math.floor(deaths).toLocaleString();
 
     requestAnimationFrame(loop);
 }
