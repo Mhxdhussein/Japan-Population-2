@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Japan 2026 Population Pyramid</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+    margin: 0;
+    font-family: "Noto Sans JP", sans-serif;
+    background: #f5f7fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    width: 900px;
+    background: white;
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h2 {
+    margin: 0;
+}
+
+button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #111;
+    color: white;
+}
+
+canvas {
+    margin-top: 20px;
+    width: 100%;
+    height: 500px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>Japan Population Pyramid (2026)</h2>
+        <button onclick="toggleDark()">Dark Mode</button>
+    </div>
+
+    <canvas id="chart"></canvas>
+</div>
+
+<script>
+const canvas = document.getElementById("chart");
+const ctx = canvas.getContext("2d");
+
+canvas.width = 900;
+canvas.height = 500;
+
+// AGE GROUPS (0 → 100+)
+const ages = [
+"0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44",
+"45-49","50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99","100+"
+];
+
+// 🇯🇵 APPROX JAPAN 2026 POPULATION DISTRIBUTION (millions)
+const male = [
+2.0,2.2,2.4,2.6,2.8,3.1,3.4,3.6,3.8,
+3.7,3.5,3.3,3.0,2.7,2.4,2.0,1.5,1.0,0.5,0.2,0.05
+];
+
+const female = [
+1.9,2.1,2.3,2.5,2.7,3.0,3.3,3.5,3.7,
+3.8,3.7,3.5,3.2,3.0,2.8,2.6,2.2,1.7,1.2,0.6,0.1
+];
+
+function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    const centerX = canvas.width / 2;
+    const barHeight = 18;
+
+    for (let i = 0; i < ages.length; i++) {
+        let y = i * barHeight + 20;
+
+        // scale
+        let m = male[i] * 20;
+        let f = female[i] * 20;
+
+        // MALE (left)
+        ctx.fillStyle = "#3b82f6";
+        ctx.fillRect(centerX - m, y, m, 12);
+
+        // FEMALE (right)
+        ctx.fillStyle = "#ec4899";
+        ctx.fillRect(centerX, y, f, 12);
+
+        // labels
+        ctx.fillStyle = "#333";
+        ctx.font = "10px sans-serif";
+        ctx.fillText(ages[i], centerX - 25, y + 10);
+    }
+
+    // center line
+    ctx.strokeStyle = "#aaa";
+    ctx.beginPath();
+    ctx.moveTo(centerX, 0);
+    ctx.lineTo(centerX, canvas.height);
+    ctx.stroke();
+}
+
+draw();
+
+function toggleDark() {
+    if (document.body.style.background === "black") {
+        document.body.style.background = "#f5f7fa";
+    } else {
+        document.body.style.background = "black";
+    }
+}
+</script>
+
+</body>
+</html>
