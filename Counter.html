@@ -2,60 +2,76 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Japan Counter Debug</title>
+<title>Japan Population Flow</title>
 
 <style>
 body{
     margin:0;
     background:#0f1115;
     color:white;
-    font-family:Arial;
+    font-family:Arial, sans-serif;
     display:flex;
     justify-content:center;
     align-items:center;
     height:100vh;
 }
 
-.box{
+.card{
     background:#161a22;
     padding:30px;
     border-radius:16px;
     width:420px;
     text-align:center;
+    box-shadow:0 10px 40px rgba(0,0,0,0.5);
+}
+
+h2{
+    margin-bottom:20px;
+    font-size:18px;
+}
+
+.stat{
+    font-size:22px;
+    margin:18px 0;
 }
 
 .birth{color:#4ade80;}
 .death{color:#f87171;}
 
-small{
-    display:block;
-    margin-top:15px;
+.small{
     opacity:0.7;
     font-size:12px;
+    margin-top:10px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="box">
-    <h2>Japan Counter (DEBUG MODE)</h2>
+<div class="card">
+    <h2>Japan Population Flow (Realistic Model)</h2>
 
-    <div class="birth">Births: <span id="b">LOADING...</span></div>
-    <div class="death">Deaths: <span id="d">LOADING...</span></div>
+    <div class="stat birth">
+        Births: <span id="b">0</span>
+    </div>
 
-    <small id="status">JS not started yet...</small>
+    <div class="stat death">
+        Deaths: <span id="d">0</span>
+    </div>
+
+    <div class="small">
+        Based on ~704k births & ~1.55M deaths yearly (trend estimate)
+    </div>
+
+    <small id="status">Starting...</small>
 </div>
 
 <script>
+document.getElementById("status").innerText = "JS running ✔";
 
-document.getElementById("status").innerText = "JS is running ✔";
-
-// REALISTIC DATA
 const birthsYear = 704000;
 const deathsYear = 1550000;
 
-// convert to per second
 const secYear = 365 * 24 * 60 * 60;
 
 const birthRate = birthsYear / secYear;
@@ -67,21 +83,19 @@ let deaths = 0;
 let last = performance.now();
 
 function loop(now){
-
     const dt = (now - last) / 1000;
     last = now;
 
     births += birthRate * dt;
     deaths += deathRate * dt;
 
-    document.getElementById("b").innerText = Math.floor(births);
-    document.getElementById("d").innerText = Math.floor(deaths);
+    document.getElementById("b").innerText = Math.floor(births).toLocaleString();
+    document.getElementById("d").innerText = Math.floor(deaths).toLocaleString();
 
     requestAnimationFrame(loop);
 }
 
 requestAnimationFrame(loop);
-
 </script>
 
 </body>
