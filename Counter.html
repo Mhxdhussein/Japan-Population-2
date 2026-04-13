@@ -2,36 +2,44 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Japan Live Population Counter</title>
+<title>Japan Population Flow Counter</title>
 
 <style>
 body{
     margin:0;
     background:#0f1115;
-    color:#fff;
-    font-family:Arial;
+    color:#eaeaea;
+    font-family:Arial, sans-serif;
     display:flex;
     justify-content:center;
     align-items:center;
     height:100vh;
 }
 
-.card{
+.container{
     background:#161a22;
     padding:30px;
     border-radius:16px;
-    width:400px;
+    width:420px;
     text-align:center;
     box-shadow:0 10px 40px rgba(0,0,0,0.5);
 }
 
 h2{
     margin-bottom:20px;
+    font-size:18px;
+    font-weight:700;
 }
 
 .stat{
-    font-size:20px;
-    margin:15px 0;
+    font-size:22px;
+    margin:18px 0;
+}
+
+.label{
+    font-size:14px;
+    opacity:0.7;
+    margin-bottom:5px;
 }
 
 .birth{color:#4ade80;}
@@ -41,49 +49,59 @@ h2{
 
 <body>
 
-<div class="card">
-    <h2>Japan Population Flow</h2>
+<div class="container">
+    <h2>Japan Population Flow (Realistic Model)</h2>
 
-    <div class="stat">
-        Births: <span class="birth" id="b">0</span>
+    <div>
+        <div class="label">Births per year (Japan avg)</div>
+        <div class="stat birth" id="births">0</div>
     </div>
 
-    <div class="stat">
-        Deaths: <span class="death" id="d">0</span>
+    <div>
+        <div class="label">Deaths per year (Japan avg)</div>
+        <div class="stat death" id="deaths">0</div>
     </div>
 </div>
 
 <script>
 
-// REALISTIC ANNUAL AVERAGES (Japan recent trend)
-const birthsYear = 770000;
-const deathsYear = 1550000;
+// 🇯🇵 REALISTIC JAPAN DATA (recent UN / government estimates)
+const annualBirths = 770000;
+const annualDeaths = 1550000;
 
-// convert to per second
+// seconds in a year
 const secondsYear = 365 * 24 * 60 * 60;
 
-const bps = birthsYear / secondsYear;
-const dps = deathsYear / secondsYear;
+// per-second flow rates
+const birthRate = annualBirths / secondsYear;
+const deathRate = annualDeaths / secondsYear;
 
+// real counters (NO FAKE START VALUE)
 let births = 0;
 let deaths = 0;
 
-let last = performance.now();
+// timing engine
+let lastTime = performance.now();
 
-function loop(now){
-    let dt = (now - last) / 1000;
-    last = now;
+function update(now){
+    const delta = (now - lastTime) / 1000;
+    lastTime = now;
 
-    births += bps * dt;
-    deaths += dps * dt;
+    // continuous accumulation (no reset possible)
+    births += birthRate * delta;
+    deaths += deathRate * delta;
 
-    document.getElementById("b").innerText = Math.floor(births).toLocaleString();
-    document.getElementById("d").innerText = Math.floor(deaths).toLocaleString();
+    document.getElementById("births").innerText =
+        Math.floor(births).toLocaleString();
 
-    requestAnimationFrame(loop);
+    document.getElementById("deaths").innerText =
+        Math.floor(deaths).toLocaleString();
+
+    requestAnimationFrame(update);
 }
 
-requestAnimationFrame(loop);
+// start loop
+requestAnimationFrame(update);
 
 </script>
 
