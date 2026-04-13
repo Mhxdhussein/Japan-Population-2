@@ -49,39 +49,56 @@ h2{
 <body>
 
 <div class="card">
-    <h2>Japan Population Flow (Live Simulation)</h2>
+    <h2>Japan Population Flow (Realistic Model)</h2>
 
     <div class="stat birth">Births: <span id="b">0</span></div>
     <div class="stat death">Deaths: <span id="d">0</span></div>
 
-    <!-- 🔥 DESCRIPTION NOW INSIDE CARD -->
     <div class="desc">
-        Based on estimated yearly demographic trends in Japan.<br>
-        Birth rate is declining while death rate continues to rise, showing long-term population pressure and aging society effects.
+        Based on estimated yearly demographic data for Japan.
+        Births are lower than deaths, showing long-term population decline.
     </div>
 </div>
 
 <script>
+// REAL DATA (approx yearly)
 const birthsYear = 704000;
 const deathsYear = 1550000;
 
+// seconds in a year
 const secYear = 365 * 24 * 60 * 60;
 
+// real per-second rates
 const birthRate = birthsYear / secYear;
 const deathRate = deathsYear / secYear;
 
-let births = 600000;
-let deaths = 1200000;
+// start at realistic year progress (so it’s not 0)
+const now = new Date();
+const start = new Date(now.getFullYear(), 0, 1);
+const progress = (now - start) / (1000 * secYear);
 
-function update(){
-    births += birthRate * 50;
-    deaths += deathRate * 50;
+let births = birthsYear * progress;
+let deaths = deathsYear * progress;
 
-    document.getElementById("b").innerText = Math.floor(births).toLocaleString();
-    document.getElementById("d").innerText = Math.floor(deaths).toLocaleString();
+let last = performance.now();
+
+function update(time){
+    const dt = (time - last) / 1000;
+    last = time;
+
+    births += birthRate * dt;
+    deaths += deathRate * dt;
+
+    document.getElementById("b").innerText =
+        Math.floor(births).toLocaleString();
+
+    document.getElementById("d").innerText =
+        Math.floor(deaths).toLocaleString();
+
+    requestAnimationFrame(update);
 }
 
-setInterval(update, 100);
+requestAnimationFrame(update);
 </script>
 
 </body>
