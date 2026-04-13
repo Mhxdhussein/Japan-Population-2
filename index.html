@@ -76,13 +76,24 @@
       border-radius: 12px;
       overflow: hidden;
       background: #ffffff;
+      position: relative;
+      height: 560px;
     }
 
-    iframe {
+    .pyramid-frame {
       width: 100%;
       height: 560px;
       border: 0;
       display: block;
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 260ms ease-in-out;
+    }
+
+    .pyramid-frame.is-visible {
+      opacity: 1;
+      z-index: 2;
     }
 
     @media (max-width: 760px) {
@@ -111,8 +122,17 @@
 
     <section class="frame-wrap">
       <iframe
-        id="pyramidFrame"
+        id="pyramidFrameA"
+        class="pyramid-frame is-visible"
         title="Japan Population Pyramid"
+        src="https://www.populationpyramid.net/japan/2025/"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+      ></iframe>
+      <iframe
+        id="pyramidFrameB"
+        class="pyramid-frame"
+        title="Japan Population Pyramid preload"
         src="https://www.populationpyramid.net/japan/2025/"
         loading="lazy"
         referrerpolicy="no-referrer-when-downgrade"
@@ -125,15 +145,36 @@
     const speedSelect = document.getElementById("speedSelect");
     const yearSlider = document.getElementById("yearSlider");
     const yearLabel = document.getElementById("yearLabel");
-    const pyramidFrame = document.getElementById("pyramidFrame");
+    const frames = [
+      document.getElementById("pyramidFrameA"),
+      document.getElementById("pyramidFrameB")
+    ];
     let timer = null;
+    let visibleIndex = 0;
+    let pendingToken = 0;
 
     function setYear(year) {
       const safeYear = Math.min(2050, Math.max(1950, Number(year)));
       const url = `https://www.populationpyramid.net/japan/${safeYear}/`;
-      if (pyramidFrame.src !== url) pyramidFrame.src = url;
       yearSlider.value = String(safeYear);
       yearLabel.textContent = `Year: ${safeYear}`;
+
+      const visibleFrame = frames[visibleIndex];
+      if (visibleFrame.src === url) return;
+
+      const hiddenIndex = visibleIndex === 0 ? 1 : 0;
+      const hiddenFrame = frames[hiddenIndex];
+      const token = ++pendingToken;
+
+      hiddenFrame.classList.remove("is-visible");
+      hiddenFrame.src = url;
+
+      hiddenFrame.onload = () => {
+        if (token !== pendingToken) return;
+        hiddenFrame.classList.add("is-visible");
+        visibleFrame.classList.remove("is-visible");
+        visibleIndex = hiddenIndex;
+      };
     }
 
     function stopAnimation() {
