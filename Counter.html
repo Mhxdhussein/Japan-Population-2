@@ -1,107 +1,405 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Japan Live Counter</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Japan Population, Birth & Death Rates (Live View)</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --bg-strong: #09101d;
+      --bg-soft: #0f1830;
+      --card: #111a2c;
+      --stat: #0e1628;
+      --muted: #9fb0d1;
+      --text: #e8eefc;
+      --accent: #5da8ff;
+      --good: #39d98a;
+      --warn: #ffc857;
+      --bad: #ff6b6b;
+      --border: #233456;
+      --error-bg: rgba(255, 107, 107, 0.15);
+      --error-border: rgba(255, 107, 107, 0.35);
+    }
 
-<style>
-body{
-    margin:0;
-    background:white;
-    font-family:Arial;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-}
+    body.light {
+      --bg: #f4f8ff;
+      --bg-strong: #eef4ff;
+      --bg-soft: #ffffff;
+      --card: rgba(255, 255, 255, 0.92);
+      --stat: #f8fbff;
+      --muted: #4a5b80;
+      --text: #13203d;
+      --accent: #1f66d1;
+      --good: #188f58;
+      --warn: #a97602;
+      --bad: #c23e3e;
+      --border: #cfdaf1;
+      --error-bg: rgba(194, 62, 62, 0.11);
+      --error-border: rgba(194, 62, 62, 0.28);
+    }
 
-.card{
-    background:#f3f4f6;
-    padding:30px;
-    border-radius:16px;
-    width:420px;
-    text-align:center;
-    box-shadow:0 10px 25px rgba(0,0,0,0.1);
-}
+    * {
+      box-sizing: border-box;
+    }
 
-h2{
-    font-size:18px;
-    margin-bottom:15px;
-}
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: linear-gradient(180deg, var(--bg-strong) 0%, var(--bg-soft) 100%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+      transition: background 220ms ease, color 220ms ease;
+    }
 
-.stat{
-    font-size:26px;
-    margin:12px 0;
-}
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
 
-.birth{color:#16a34a;}
-.death{color:#dc2626;}
+    .header,
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      backdrop-filter: blur(3px);
+      transition: background 220ms ease, border-color 220ms ease, color 220ms ease;
+    }
 
-.desc{
-    font-size:12px;
-    opacity:0.7;
-    margin-top:15px;
-    line-height:1.4;
-}
-</style>
+    h1, h2 {
+      margin: 0 0 10px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .stat {
+      background: var(--stat);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      transition: background 220ms ease, border-color 220ms ease, color 220ms ease;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-bottom: 6px;
+    }
+
+    .value {
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      margin-bottom: 4px;
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .delta-up { color: var(--good); }
+    .delta-flat { color: var(--warn); }
+    .delta-down { color: var(--bad); }
+
+    ul {
+      margin: 10px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    a {
+      color: var(--accent);
+    }
+
+    .error {
+      color: #ffd3d3;
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: none;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 12px;
+    }
+
+    .theme-toggle {
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 120ms ease, background 220ms ease, border-color 220ms ease, color 220ms ease;
+    }
+
+    .theme-toggle:hover {
+      transform: translateY(-1px);
+    }
+
+    @media (max-width: 740px) {
+      .row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
-
 <body>
-
-<div class="card">
-    <h2>Japan Live Population Counter</h2>
-
-    <div class="stat birth">Births (2026): <span id="b">0</span></div>
-    <div class="stat death">Deaths (2026): <span id="d">0</span></div>
-
-    <div class="desc">
-        Realistic estimate based on Japan annual statistics (~700k births, ~1.5M deaths per year).
+  <main class="container">
+    <div class="toolbar">
+      <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch theme">
+        Switch to Light Theme
+      </button>
     </div>
-</div>
 
-<script>
+    <section class="header">
+      <h1>Japan Demographics Dashboard</h1>
+      <p class="subtitle">
+        Organized live view of Japan's estimated current population and latest available
+        official birth/death rates, pulled from World Bank indicators.
+      </p>
+    </section>
 
-// REALISTIC ANNUAL DATA
-const birthsYear = 720000;
-const deathsYear = 1550000;
+    <div id="errorBox" class="error"></div>
 
-// seconds in a year
-const secYear = 365 * 24 * 60 * 60;
+    <section class="stats">
+      <article class="stat">
+        <div class="label">Estimated Current Population</div>
+        <div id="populationNow" class="value">Loading...</div>
+        <div class="note" id="populationBase"></div>
+      </article>
 
-// per second rate
-const birthRate = birthsYear / secYear;
-const deathRate = deathsYear / secYear;
+      <article class="stat">
+        <div class="label">Birth Rate (Crude, per 1,000 people)</div>
+        <div id="birthRate" class="value">Loading...</div>
+        <div class="note" id="birthYear"></div>
+      </article>
 
-// 🔥 START FROM REALISTIC CURRENT YEAR VALUE (NOT ZERO)
-const now = new Date();
-const start = new Date(now.getFullYear(), 0, 1);
+      <article class="stat">
+        <div class="label">Death Rate (Crude, per 1,000 people)</div>
+        <div id="deathRate" class="value">Loading...</div>
+        <div class="note" id="deathYear"></div>
+      </article>
 
-// assume year-to-date progress already happened
-const progress = (now - start) / (1000 * secYear);
+      <article class="stat">
+        <div class="label">Population Growth Rate (annual %)</div>
+        <div id="growthRate" class="value">Loading...</div>
+        <div class="note" id="growthYear"></div>
+      </article>
+    </section>
 
-let births = birthsYear * progress;
-let deaths = deathsYear * progress;
+    <section class="row">
+      <article class="card">
+        <h2>Live Trend Signal</h2>
+        <p id="trendText" class="subtitle">Loading trend...</p>
+        <p style="margin-top:10px">
+          <span id="trendPill" class="pill">Checking...</span>
+        </p>
+      </article>
 
-let last = performance.now();
+      <article class="card">
+        <h2>Data Quality Notes</h2>
+        <ul>
+          <li>Rates are official yearly indicators, not second-by-second census data.</li>
+          <li>"Live population" is a real-time estimate from the latest annual growth rate.</li>
+          <li>Japan code used for all queries: <strong>JPN</strong>.</li>
+        </ul>
+      </article>
+    </section>
 
-function update(t){
-    const dt = (t - last) / 1000;
-    last = t;
+    <section class="card">
+      <h2>Sources</h2>
+      <ul>
+        <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.POP.TOTL?format=json" target="_blank" rel="noopener noreferrer">World Bank: Total Population</a></li>
+        <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.DYN.CBRT.IN?format=json" target="_blank" rel="noopener noreferrer">World Bank: Birth Rate</a></li>
+        <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.DYN.CDRT.IN?format=json" target="_blank" rel="noopener noreferrer">World Bank: Death Rate</a></li>
+        <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.POP.GROW?format=json" target="_blank" rel="noopener noreferrer">World Bank: Population Growth Rate</a></li>
+      </ul>
+      <p class="note" id="lastRefresh" style="margin-top:12px"></p>
+    </section>
+  </main>
 
-    births += birthRate * dt;
-    deaths += deathRate * dt;
+  <script>
+    const fmtInt = new Intl.NumberFormat("en-US");
+    const fmtRate = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    document.getElementById("b").innerText =
-        Math.floor(births).toLocaleString();
+    const els = {
+      themeToggle: document.getElementById("themeToggle"),
+      populationNow: document.getElementById("populationNow"),
+      populationBase: document.getElementById("populationBase"),
+      birthRate: document.getElementById("birthRate"),
+      birthYear: document.getElementById("birthYear"),
+      deathRate: document.getElementById("deathRate"),
+      deathYear: document.getElementById("deathYear"),
+      growthRate: document.getElementById("growthRate"),
+      growthYear: document.getElementById("growthYear"),
+      trendText: document.getElementById("trendText"),
+      trendPill: document.getElementById("trendPill"),
+      lastRefresh: document.getElementById("lastRefresh"),
+      errorBox: document.getElementById("errorBox")
+    };
 
-    document.getElementById("d").innerText =
-        Math.floor(deaths).toLocaleString();
+    const THEME_KEY = "dashboard-theme";
 
-    requestAnimationFrame(update);
-}
+    function setThemeButtonLabel(isLight) {
+      els.themeToggle.textContent = isLight ? "Switch to Dark Theme" : "Switch to Light Theme";
+      els.themeToggle.setAttribute("aria-label", isLight ? "Switch to dark theme" : "Switch to light theme");
+    }
 
-requestAnimationFrame(update);
-</script>
+    function applyTheme(theme) {
+      const isLight = theme === "light";
+      document.body.classList.toggle("light", isLight);
+      setThemeButtonLabel(isLight);
+    }
 
+    function initializeTheme() {
+      const stored = localStorage.getItem(THEME_KEY);
+      if (stored === "light" || stored === "dark") {
+        applyTheme(stored);
+        return;
+      }
+
+      const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+      applyTheme(prefersLight ? "light" : "dark");
+    }
+
+    function toggleTheme() {
+      const isLight = document.body.classList.contains("light");
+      const next = isLight ? "dark" : "light";
+      applyTheme(next);
+      localStorage.setItem(THEME_KEY, next);
+    }
+
+    function showError(message) {
+      els.errorBox.style.display = "block";
+      els.errorBox.textContent = message;
+    }
+
+    async function fetchLatestIndicator(indicator) {
+      const url = `https://api.worldbank.org/v2/country/JPN/indicator/${indicator}?format=json&per_page=80`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed request for ${indicator}: ${response.status}`);
+      }
+
+      const payload = await response.json();
+      const rows = Array.isArray(payload) ? payload[1] : [];
+      if (!Array.isArray(rows) || rows.length === 0) {
+        throw new Error(`No rows returned for ${indicator}`);
+      }
+
+      const latest = rows.find((row) => row && row.value !== null && row.value !== undefined);
+      if (!latest) {
+        throw new Error(`No non-null value for ${indicator}`);
+      }
+
+      return { value: Number(latest.value), year: Number(latest.date) };
+    }
+
+    let basePopulation = 0;
+    let baseTimestamp = 0;
+    let yearlyGrowthPercent = 0;
+
+    function updateLivePopulation() {
+      if (!basePopulation || !baseTimestamp) return;
+
+      const now = Date.now();
+      const yearsElapsed = (now - baseTimestamp) / (365.25 * 24 * 60 * 60 * 1000);
+      const estimated = basePopulation * Math.pow(1 + yearlyGrowthPercent / 100, yearsElapsed);
+      els.populationNow.textContent = fmtInt.format(Math.round(estimated));
+    }
+
+    function setTrend(birthRate, deathRate, growthRate) {
+      const naturalDelta = birthRate - deathRate;
+      const isDeclining = naturalDelta < 0 || growthRate < 0;
+      const isNearFlat = Math.abs(growthRate) < 0.1;
+
+      if (isDeclining) {
+        els.trendPill.textContent = "Population is shrinking";
+        els.trendPill.className = "pill delta-down";
+      } else if (isNearFlat) {
+        els.trendPill.textContent = "Population is nearly stable";
+        els.trendPill.className = "pill delta-flat";
+      } else {
+        els.trendPill.textContent = "Population is growing";
+        els.trendPill.className = "pill delta-up";
+      }
+
+      const sign = naturalDelta > 0 ? "+" : "";
+      els.trendText.textContent = `Natural change (birth minus death) is ${sign}${fmtRate.format(naturalDelta)} per 1,000 people.`;
+    }
+
+    async function loadJapanData() {
+      try {
+        const [pop, birth, death, growth] = await Promise.all([
+          fetchLatestIndicator("SP.POP.TOTL"),
+          fetchLatestIndicator("SP.DYN.CBRT.IN"),
+          fetchLatestIndicator("SP.DYN.CDRT.IN"),
+          fetchLatestIndicator("SP.POP.GROW")
+        ]);
+
+        basePopulation = pop.value;
+        yearlyGrowthPercent = growth.value;
+        baseTimestamp = new Date(`${pop.year}-12-31T23:59:59Z`).getTime();
+
+        els.populationBase.textContent = `Base: ${fmtInt.format(pop.value)} (${pop.year})`;
+        els.birthRate.textContent = fmtRate.format(birth.value);
+        els.birthYear.textContent = `Latest year: ${birth.year}`;
+        els.deathRate.textContent = fmtRate.format(death.value);
+        els.deathYear.textContent = `Latest year: ${death.year}`;
+        els.growthRate.textContent = `${growth.value >= 0 ? "+" : ""}${fmtRate.format(growth.value)}%`;
+        els.growthYear.textContent = `Latest year: ${growth.year}`;
+
+        setTrend(birth.value, death.value, growth.value);
+        updateLivePopulation();
+        setInterval(updateLivePopulation, 1000);
+
+        els.lastRefresh.textContent = `Last refreshed: ${new Date().toLocaleString()}`;
+      } catch (err) {
+        showError("Could not load live data. Please check your internet connection and try again.");
+        console.error(err);
+      }
+    }
+
+    els.themeToggle.addEventListener("click", toggleTheme);
+    initializeTheme();
+    loadJapanData();
+  </script>
 </body>
 </html>
