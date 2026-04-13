@@ -49,48 +49,57 @@ h2{
 <body>
 
 <div class="card">
-    <h2>Japan Live Population Counter</h2>
+    <h2>Japan Population Flow (Realistic Live Estimate)</h2>
 
-    <div class="stat birth">Births: <span id="b">0</span></div>
-    <div class="stat death">Deaths: <span id="d">0</span></div>
+    <div class="stat birth">Births (year): <span id="b">0</span></div>
+    <div class="stat death">Deaths (year): <span id="d">0</span></div>
 
     <div class="desc">
-        Based on World Bank estimates (birth rate ~6 per 1,000, death rate ~13 per 1,000).<br>
-        This model simulates continuous demographic flow in real time.
+        Based on Japan annual statistics (~700k births, ~1.5M deaths per year). Values show year-to-date progression.
     </div>
 </div>
 
 <script>
-// REALISTIC RATES (per year)
-const population = 125000000; // approx Japan population
 
-const birthRatePer1000 = 6;
-const deathRatePer1000 = 13;
+// REAL ANNUAL ESTIMATES
+const birthsYear = 720000;   // realistic Japan range
+const deathsYear = 1550000;
 
-// convert to yearly counts
-const birthsYear = (population / 1000) * birthRatePer1000;
-const deathsYear = (population / 1000) * deathRatePer1000;
-
-// per second
+// time constants
 const secYear = 365 * 24 * 60 * 60;
 
+// per second flow
 const birthRate = birthsYear / secYear;
 const deathRate = deathsYear / secYear;
 
-// start at realistic base (not zero)
-let births = 0;
-let deaths = 0;
+// START AT REALISTIC YEAR PROGRESS (THIS IS THE FIX)
+const now = new Date();
+const start = new Date(now.getFullYear(), 0, 1);
+const progress = (now - start) / (1000 * secYear);
 
-function update(){
+// real YTD values
+let births = birthsYear * progress;
+let deaths = deathsYear * progress;
 
-    births += birthRate * 10;
-    deaths += deathRate * 10;
+let last = performance.now();
 
-    document.getElementById("b").innerText = Math.floor(births).toLocaleString();
-    document.getElementById("d").innerText = Math.floor(deaths).toLocaleString();
+function loop(t){
+    const dt = (t - last) / 1000;
+    last = t;
+
+    births += birthRate * dt;
+    deaths += deathRate * dt;
+
+    document.getElementById("b").innerText =
+        Math.floor(births).toLocaleString();
+
+    document.getElementById("d").innerText =
+        Math.floor(deaths).toLocaleString();
+
+    requestAnimationFrame(loop);
 }
 
-setInterval(update, 100);
+requestAnimationFrame(loop);
 </script>
 
 </body>
