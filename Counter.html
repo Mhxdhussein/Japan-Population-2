@@ -2,85 +2,104 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Japan Population Flow</title>
+<title>Japan Population Counter</title>
 
 <style>
 body{
     margin:0;
-    background:white;
-    font-family:Arial;
+    background:#0f1115;
+    color:#fff;
+    font-family:Arial, sans-serif;
     display:flex;
     justify-content:center;
     align-items:center;
     height:100vh;
 }
 
-.card{
-    background:#f3f4f6;
+.box{
+    background:#161a22;
     padding:30px;
     border-radius:16px;
     width:420px;
     text-align:center;
-    box-shadow:0 10px 25px rgba(0,0,0,0.1);
+    box-shadow:0 10px 40px rgba(0,0,0,0.5);
 }
 
 h2{
-    font-size:18px;
     margin-bottom:20px;
 }
 
 .stat{
-    font-size:26px;
+    font-size:24px;
     margin:15px 0;
 }
 
-.birth{color:green;}
-.death{color:red;}
+.birth{color:#4ade80;}
+.death{color:#f87171;}
 
-.small{
-    font-size:12px;
-    opacity:0.6;
+small{
+    display:block;
     margin-top:10px;
+    opacity:0.6;
 }
 </style>
 </head>
 
 <body>
 
-<div class="card">
+<div class="box">
     <h2>Japan Population Flow</h2>
 
-    <div class="stat birth">Births: <span id="b">0</span></div>
-    <div class="stat death">Deaths: <span id="d">0</span></div>
+    <div class="stat birth">
+        Births: <span id="b">0</span>
+    </div>
 
-    <div class="small">Live estimated model</div>
+    <div class="stat death">
+        Deaths: <span id="d">0</span>
+    </div>
+
+    <small>Based on ~704k births & ~1.55M deaths yearly estimates</small>
 </div>
 
 <script>
-window.onload = function(){
 
+// 🇯🇵 REALISTIC JAPAN DATA
 const birthsYear = 704000;
 const deathsYear = 1550000;
 
+// seconds in a year
 const secYear = 365 * 24 * 60 * 60;
 
+// per second rates
 const birthRate = birthsYear / secYear;
 const deathRate = deathsYear / secYear;
 
-// start from realistic base numbers
-let births = 700000;
-let deaths = 1500000;
+// counters (START FROM ZERO — NO FAKE VALUES)
+let births = 0;
+let deaths = 0;
 
-function update(){
-    births += birthRate * 1;
-    deaths += deathRate * 1;
+// timing
+let last = performance.now();
 
-    document.getElementById("b").innerText = Math.floor(births).toLocaleString();
-    document.getElementById("d").innerText = Math.floor(deaths).toLocaleString();
+function loop(now){
+
+    const dt = (now - last) / 1000;
+    last = now;
+
+    births += birthRate * dt;
+    deaths += deathRate * dt;
+
+    document.getElementById("b").innerText =
+        Math.floor(births).toLocaleString();
+
+    document.getElementById("d").innerText =
+        Math.floor(deaths).toLocaleString();
+
+    requestAnimationFrame(loop);
 }
 
-setInterval(update, 100);
-};
+requestAnimationFrame(loop);
+
 </script>
 
 </body>
