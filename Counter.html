@@ -26,21 +26,22 @@ body{
 
 h2{
     font-size:18px;
-    margin-bottom:20px;
+    margin-bottom:15px;
 }
 
 .stat{
     font-size:28px;
-    margin:15px 0;
+    margin:12px 0;
 }
 
 .birth{color:green;}
 .death{color:red;}
 
-.small{
+.desc{
     font-size:12px;
-    opacity:0.6;
-    margin-top:10px;
+    opacity:0.7;
+    margin-top:15px;
+    line-height:1.4;
 }
 </style>
 </head>
@@ -53,7 +54,11 @@ h2{
     <div class="stat birth">Births: <span id="b">0</span></div>
     <div class="stat death">Deaths: <span id="d">0</span></div>
 
-    <div class="small">Based on yearly demographic estimates</div>
+    <!-- 🔥 DESCRIPTION NOW INSIDE CARD -->
+    <div class="desc">
+        Based on estimated yearly demographic trends in Japan.<br>
+        Birth rate is declining while death rate continues to rise, showing long-term population pressure and aging society effects.
+    </div>
 </div>
 
 <script>
@@ -62,25 +67,18 @@ const deathsYear = 1550000;
 
 const secYear = 365 * 24 * 60 * 60;
 
-// per SECOND
 const birthRate = birthsYear / secYear;
 const deathRate = deathsYear / secYear;
 
-// START BIG so movement is visible immediately
 let births = 600000;
 let deaths = 1200000;
 
 function update(){
-
-    // multiply so it visibly moves (this is the fix)
     births += birthRate * 50;
     deaths += deathRate * 50;
 
-    document.getElementById("b").innerText =
-        Math.floor(births).toLocaleString();
-
-    document.getElementById("d").innerText =
-        Math.floor(deaths).toLocaleString();
+    document.getElementById("b").innerText = Math.floor(births).toLocaleString();
+    document.getElementById("d").innerText = Math.floor(deaths).toLocaleString();
 }
 
 setInterval(update, 100);
