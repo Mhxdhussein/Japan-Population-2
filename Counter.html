@@ -3,485 +3,208 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Japan Population Dashboard (Easy View)</title>
+  <title>Japan Live Births, Deaths, and Population</title>
   <style>
     :root {
       --bg: #0b1220;
-      --bg-strong: #09101d;
-      --bg-soft: #0f1830;
       --card: #111a2c;
-      --stat: #0e1628;
-      --muted: #9fb0d1;
       --text: #e8eefc;
-      --accent: #5da8ff;
-      --good: #39d98a;
-      --warn: #ffc857;
-      --bad: #ff6b6b;
-      --border: #233456;
-      --error-bg: rgba(255, 107, 107, 0.15);
-      --error-border: rgba(255, 107, 107, 0.35);
+      --muted: #9fb0d1;
+      --border: #263a61;
+      --accent: #60a5fa;
     }
-
-    body.light {
-      --bg: #f4f8ff;
-      --bg-strong: #eef4ff;
-      --bg-soft: #ffffff;
-      --card: rgba(255, 255, 255, 0.92);
-      --stat: #f8fbff;
-      --muted: #4a5b80;
-      --text: #13203d;
-      --accent: #1f66d1;
-      --good: #188f58;
-      --warn: #a97602;
-      --bad: #c23e3e;
-      --border: #cfdaf1;
-      --error-bg: rgba(194, 62, 62, 0.11);
-      --error-border: rgba(194, 62, 62, 0.28);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background: linear-gradient(180deg, var(--bg-strong) 0%, var(--bg-soft) 100%);
+      font-family: Arial, sans-serif;
+      background: linear-gradient(180deg, #09101d 0%, #0f1830 100%);
       color: var(--text);
-      min-height: 100vh;
-      padding: 24px;
-      transition: background 220ms ease, color 220ms ease;
+      padding: 22px;
     }
-
-    .container {
-      max-width: 1160px;
+    .wrap {
+      max-width: 900px;
       margin: 0 auto;
       display: grid;
       gap: 14px;
     }
-
-    .topbar,
-    .header,
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 18px;
-      backdrop-filter: blur(3px);
-      transition: background 220ms ease, border-color 220ms ease, color 220ms ease;
-    }
-
-    h1, h2 {
-      margin: 0 0 10px;
-      font-weight: 700;
-    }
-
-    .subtitle {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.4;
-    }
-
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-    }
-
-    .brand {
-      font-weight: 700;
-      letter-spacing: 0.2px;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
-    }
-
-    .hero-grid {
-      display: grid;
-      grid-template-columns: 1.3fr 1fr;
-      gap: 14px;
-    }
-
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .hero-stat {
-      background: var(--stat);
-      border: 1px solid var(--border);
       border-radius: 12px;
       padding: 16px;
-      transition: background 220ms ease, border-color 220ms ease, color 220ms ease;
     }
-
-    .hero-stat .value {
-      font-size: 2.2rem;
-      margin-bottom: 8px;
-    }
-
-    .stat {
-      background: var(--stat);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
-      transition: background 220ms ease, border-color 220ms ease, color 220ms ease;
-    }
-
-    .label {
-      color: var(--muted);
-      font-size: 0.92rem;
-      margin-bottom: 6px;
-    }
-
-    .value {
-      font-size: 1.65rem;
-      font-weight: 700;
-      letter-spacing: 0.2px;
-      margin-bottom: 4px;
-    }
-
-    .note {
-      color: var(--muted);
-      font-size: 0.84rem;
-    }
-
-    .row {
+    h1, h2 { margin: 0 0 8px; }
+    .sub { margin: 0; color: var(--muted); line-height: 1.45; }
+    .grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
     }
-
-    .section-title {
-      margin: 0 0 2px;
-      font-size: 0.82rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .header h1 {
-      margin-bottom: 6px;
-    }
-
-    .meta-line {
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 0.86rem;
-    }
-
-    .pill {
-      display: inline-block;
-      padding: 5px 10px;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      border: 1px solid var(--border);
-      color: var(--muted);
-    }
-
-    .delta-up { color: var(--good); }
-    .delta-flat { color: var(--warn); }
-    .delta-down { color: var(--bad); }
-
-    ul {
-      margin: 10px 0 0;
-      padding-left: 18px;
-      color: var(--muted);
-      line-height: 1.55;
-    }
-
-    a {
-      color: var(--accent);
-    }
-
-    .error {
-      color: #ffd3d3;
-      background: var(--error-bg);
-      border: 1px solid var(--error-border);
+    .label { color: var(--muted); font-size: 0.9rem; margin-bottom: 6px; }
+    .value { font-size: 1.8rem; font-weight: 700; }
+    .note { color: var(--muted); font-size: 0.82rem; margin-top: 6px; }
+    .ok {
+      color: #c8f3d7;
+      background: rgba(64, 186, 107, 0.13);
+      border: 1px solid rgba(64, 186, 107, 0.35);
       border-radius: 10px;
       padding: 10px 12px;
+      font-size: 0.9rem;
+    }
+    .err {
       display: none;
+      color: #ffd6d6;
+      background: rgba(255, 95, 95, 0.13);
+      border: 1px solid rgba(255, 95, 95, 0.35);
+      border-radius: 10px;
+      padding: 10px 12px;
     }
-
-    .theme-toggle {
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--text);
-      border-radius: 999px;
-      padding: 8px 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 120ms ease, background 220ms ease, border-color 220ms ease, color 220ms ease;
-    }
-
-    .theme-toggle:hover {
-      transform: translateY(-1px);
-    }
-
-    @media (max-width: 740px) {
-      .topbar {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .hero-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .kpi-grid,
-      .row {
-        grid-template-columns: 1fr;
-      }
-    }
+    a { color: var(--accent); }
   </style>
 </head>
 <body>
-  <main class="container">
-    <section class="topbar">
-      <div class="brand">Japan Live Population</div>
-      <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch theme">
-        Switch to Light Theme
-      </button>
-    </section>
-
-    <section class="header">
-      <p class="section-title">Live Country Data</p>
-      <h1>Japan Population Dashboard</h1>
-      <p class="subtitle">
-        This page shows simple live facts about Japan's population.
+  <main class="wrap">
+    <section class="card">
+      <h1>Japan Live Population Counter</h1>
+      <p class="sub">
+        Simple view: population, birth rate, death rate, and live totals for this year.
       </p>
-      <p class="meta-line">Country code: <strong>JPN</strong> | Data comes from official yearly reports</p>
     </section>
 
-    <div id="errorBox" class="error"></div>
+    <div id="errorBox" class="err"></div>
 
-    <section class="hero-grid">
-      <article class="hero-stat">
-        <div class="label">People Living in Japan (Estimate Right Now)</div>
+    <section class="grid">
+      <article class="card">
+        <div class="label">People in Japan now (estimate)</div>
         <div id="populationNow" class="value">Loading...</div>
-        <div class="note" id="populationBase"></div>
+        <div id="populationYear" class="note"></div>
       </article>
-
       <article class="card">
-        <h2>Population Trend</h2>
-        <p id="trendText" class="subtitle">Loading trend...</p>
-        <p style="margin-top:10px">
-          <span id="trendPill" class="pill">Checking...</span>
-        </p>
-      </article>
-    </section>
-
-    <section>
-      <p class="section-title">Main Numbers</p>
-      <div class="kpi-grid">
-      <article class="stat">
-        <div class="label">Birth Rate (How many babies are born each year per 1,000 people)</div>
+        <div class="label">Birth rate (per 1,000 people each year)</div>
         <div id="birthRate" class="value">Loading...</div>
-        <div class="note" id="birthYear"></div>
+        <div id="birthYear" class="note"></div>
       </article>
-
-      <article class="stat">
-        <div class="label">Death Rate (How many people die each year per 1,000 people)</div>
+      <article class="card">
+        <div class="label">Death rate (per 1,000 people each year)</div>
         <div id="deathRate" class="value">Loading...</div>
-        <div class="note" id="deathYear"></div>
+        <div id="deathYear" class="note"></div>
       </article>
-
-      <article class="stat">
-        <div class="label">Population Change (Yearly %)</div>
-        <div id="growthRate" class="value">Loading...</div>
-        <div class="note" id="growthYear"></div>
-      </article>
-      </div>
     </section>
 
-    <section>
-      <p class="section-title">Extra Help</p>
-      <div class="row">
+    <section class="grid">
       <article class="card">
-        <h2>What This Means</h2>
-        <ul>
-          <li>The rates are based on official yearly reports.</li>
-          <li>The "live population" number is an estimate that updates every second.</li>
-          <li>All data on this page is for Japan (<strong>JPN</strong>).</li>
-        </ul>
+        <h2>Births so far this year</h2>
+        <div id="birthsSoFar" class="value">Loading...</div>
       </article>
-
       <article class="card">
-        <h2>How To Take The Code</h2>
-        <ul>
-          <li>Open `index.html` in your editor.</li>
-          <li>Select all (`Cmd + A`) and copy (`Cmd + C`).</li>
-          <li>Paste into any new `.html` file or your project file.</li>
-          <li>You can also right-click the file and duplicate/share it directly.</li>
-        </ul>
+        <h2>Deaths so far this year</h2>
+        <div id="deathsSoFar" class="value">Loading...</div>
       </article>
-      </div>
+      <article class="card">
+        <h2>Population change so far</h2>
+        <div id="netSoFar" class="value">Loading...</div>
+      </article>
     </section>
 
     <section class="card">
-      <p class="section-title">Source Links</p>
-      <h2>Sources</h2>
-      <ul>
-        <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.POP.TOTL?format=json" target="_blank" rel="noopener noreferrer">World Bank: Total Population</a></li>
-        <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.DYN.CBRT.IN?format=json" target="_blank" rel="noopener noreferrer">World Bank: Birth Rate</a></li>
-        <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.DYN.CDRT.IN?format=json" target="_blank" rel="noopener noreferrer">World Bank: Death Rate</a></li>
-        <li><a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.POP.GROW?format=json" target="_blank" rel="noopener noreferrer">World Bank: Population Growth Rate</a></li>
-      </ul>
-      <p class="note" id="lastRefresh" style="margin-top:12px"></p>
+      <div class="ok" id="lastUpdate">Updating...</div>
+      <p class="note" style="margin-top:10px;">
+        Data source: World Bank indicators for Japan (`JPN`):
+        <a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.POP.TOTL?format=json" target="_blank" rel="noopener noreferrer">population</a>,
+        <a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.DYN.CBRT.IN?format=json" target="_blank" rel="noopener noreferrer">birth rate</a>,
+        <a href="https://api.worldbank.org/v2/country/JPN/indicator/SP.DYN.CDRT.IN?format=json" target="_blank" rel="noopener noreferrer">death rate</a>.
+      </p>
     </section>
   </main>
 
   <script>
     const fmtInt = new Intl.NumberFormat("en-US");
-    const fmtRate = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmt2 = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    const els = {
-      themeToggle: document.getElementById("themeToggle"),
+    const el = {
       populationNow: document.getElementById("populationNow"),
-      populationBase: document.getElementById("populationBase"),
+      populationYear: document.getElementById("populationYear"),
       birthRate: document.getElementById("birthRate"),
       birthYear: document.getElementById("birthYear"),
       deathRate: document.getElementById("deathRate"),
       deathYear: document.getElementById("deathYear"),
-      growthRate: document.getElementById("growthRate"),
-      growthYear: document.getElementById("growthYear"),
-      trendText: document.getElementById("trendText"),
-      trendPill: document.getElementById("trendPill"),
-      lastRefresh: document.getElementById("lastRefresh"),
+      birthsSoFar: document.getElementById("birthsSoFar"),
+      deathsSoFar: document.getElementById("deathsSoFar"),
+      netSoFar: document.getElementById("netSoFar"),
+      lastUpdate: document.getElementById("lastUpdate"),
       errorBox: document.getElementById("errorBox")
     };
 
-    const THEME_KEY = "dashboard-theme";
+    let basePopulation = 0;
+    let basePopulationYear = 0;
+    let birthRate = 0;
+    let deathRate = 0;
 
-    function setThemeButtonLabel(isLight) {
-      els.themeToggle.textContent = isLight ? "Switch to Dark Theme" : "Switch to Light Theme";
-      els.themeToggle.setAttribute("aria-label", isLight ? "Switch to dark theme" : "Switch to light theme");
-    }
-
-    function applyTheme(theme) {
-      const isLight = theme === "light";
-      document.body.classList.toggle("light", isLight);
-      setThemeButtonLabel(isLight);
-    }
-
-    function initializeTheme() {
-      const stored = localStorage.getItem(THEME_KEY);
-      if (stored === "light" || stored === "dark") {
-        applyTheme(stored);
-        return;
-      }
-
-      const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
-      applyTheme(prefersLight ? "light" : "dark");
-    }
-
-    function toggleTheme() {
-      const isLight = document.body.classList.contains("light");
-      const next = isLight ? "dark" : "light";
-      applyTheme(next);
-      localStorage.setItem(THEME_KEY, next);
-    }
-
-    function showError(message) {
-      els.errorBox.style.display = "block";
-      els.errorBox.textContent = message;
-    }
-
-    async function fetchLatestIndicator(indicator) {
+    async function getLatest(indicator) {
       const url = `https://api.worldbank.org/v2/country/JPN/indicator/${indicator}?format=json&per_page=80`;
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Failed request for ${indicator}: ${response.status}`);
-      }
-
-      const payload = await response.json();
-      const rows = Array.isArray(payload) ? payload[1] : [];
-      if (!Array.isArray(rows) || rows.length === 0) {
-        throw new Error(`No rows returned for ${indicator}`);
-      }
-
-      const latest = rows.find((row) => row && row.value !== null && row.value !== undefined);
-      if (!latest) {
-        throw new Error(`No non-null value for ${indicator}`);
-      }
-
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Failed: ${indicator}`);
+      const data = await res.json();
+      const rows = Array.isArray(data) ? data[1] : [];
+      const latest = rows.find((r) => r && r.value !== null && r.value !== undefined);
+      if (!latest) throw new Error(`No data: ${indicator}`);
       return { value: Number(latest.value), year: Number(latest.date) };
     }
 
-    let basePopulation = 0;
-    let baseTimestamp = 0;
-    let yearlyGrowthPercent = 0;
-
-    function updateLivePopulation() {
-      if (!basePopulation || !baseTimestamp) return;
-
-      const now = Date.now();
-      const yearsElapsed = (now - baseTimestamp) / (365.25 * 24 * 60 * 60 * 1000);
-      const estimated = basePopulation * Math.pow(1 + yearlyGrowthPercent / 100, yearsElapsed);
-      els.populationNow.textContent = fmtInt.format(Math.round(estimated));
+    function yearFractionSoFar(now) {
+      const start = new Date(now.getFullYear(), 0, 1);
+      const end = new Date(now.getFullYear() + 1, 0, 1);
+      return (now - start) / (end - start);
     }
 
-    function setTrend(birthRate, deathRate, growthRate) {
-      const naturalDelta = birthRate - deathRate;
-      const isDeclining = naturalDelta < 0 || growthRate < 0;
-      const isNearFlat = Math.abs(growthRate) < 0.1;
+    function renderLive() {
+      const now = new Date();
+      const sinceBaseYears = (now - new Date(basePopulationYear, 11, 31, 23, 59, 59)) / (365.25 * 24 * 60 * 60 * 1000);
 
-      if (isDeclining) {
-        els.trendPill.textContent = "Population is going down";
-        els.trendPill.className = "pill delta-down";
-      } else if (isNearFlat) {
-        els.trendPill.textContent = "Population is staying almost the same";
-        els.trendPill.className = "pill delta-flat";
-      } else {
-        els.trendPill.textContent = "Population is going up";
-        els.trendPill.className = "pill delta-up";
-      }
+      // Use natural change estimate from birth/death rates.
+      const naturalGrowthPercent = (birthRate - deathRate) / 10;
+      const populationNow = basePopulation * Math.pow(1 + naturalGrowthPercent / 100, sinceBaseYears);
+      const frac = yearFractionSoFar(now);
+      const births = populationNow * (birthRate / 1000) * frac;
+      const deaths = populationNow * (deathRate / 1000) * frac;
+      const net = births - deaths;
 
-      const sign = naturalDelta > 0 ? "+" : "";
-      els.trendText.textContent = `Births minus deaths is ${sign}${fmtRate.format(naturalDelta)} for every 1,000 people.`;
+      el.populationNow.textContent = fmtInt.format(Math.round(populationNow));
+      el.birthsSoFar.textContent = fmtInt.format(Math.round(births));
+      el.deathsSoFar.textContent = fmtInt.format(Math.round(deaths));
+      el.netSoFar.textContent = `${net >= 0 ? "+" : "-"}${fmtInt.format(Math.round(Math.abs(net)))}`;
+      el.lastUpdate.textContent = `Live estimate updated: ${now.toLocaleString()}`;
     }
 
-    async function loadJapanData() {
+    async function init() {
       try {
-        const [pop, birth, death, growth] = await Promise.all([
-          fetchLatestIndicator("SP.POP.TOTL"),
-          fetchLatestIndicator("SP.DYN.CBRT.IN"),
-          fetchLatestIndicator("SP.DYN.CDRT.IN"),
-          fetchLatestIndicator("SP.POP.GROW")
+        const [pop, br, dr] = await Promise.all([
+          getLatest("SP.POP.TOTL"),
+          getLatest("SP.DYN.CBRT.IN"),
+          getLatest("SP.DYN.CDRT.IN")
         ]);
 
         basePopulation = pop.value;
-        yearlyGrowthPercent = growth.value;
-        baseTimestamp = new Date(`${pop.year}-12-31T23:59:59Z`).getTime();
+        basePopulationYear = pop.year;
+        birthRate = br.value;
+        deathRate = dr.value;
 
-        els.populationBase.textContent = `Starting number: ${fmtInt.format(pop.value)} (${pop.year})`;
-        els.birthRate.textContent = fmtRate.format(birth.value);
-        els.birthYear.textContent = `Most recent year: ${birth.year}`;
-        els.deathRate.textContent = fmtRate.format(death.value);
-        els.deathYear.textContent = `Most recent year: ${death.year}`;
-        els.growthRate.textContent = `${growth.value >= 0 ? "+" : ""}${fmtRate.format(growth.value)}%`;
-        els.growthYear.textContent = `Most recent year: ${growth.year}`;
+        el.populationYear.textContent = `Base year used: ${pop.year}`;
+        el.birthRate.textContent = fmt2.format(br.value);
+        el.birthYear.textContent = `Most recent year: ${br.year}`;
+        el.deathRate.textContent = fmt2.format(dr.value);
+        el.deathYear.textContent = `Most recent year: ${dr.year}`;
 
-        setTrend(birth.value, death.value, growth.value);
-        updateLivePopulation();
-        setInterval(updateLivePopulation, 1000);
-
-        els.lastRefresh.textContent = `Last updated: ${new Date().toLocaleString()}`;
-      } catch (err) {
-        showError("Could not load live data. Please check your internet connection and try again.");
-        console.error(err);
+        renderLive();
+        setInterval(renderLive, 1000);
+      } catch (error) {
+        el.errorBox.style.display = "block";
+        el.errorBox.textContent = "Could not load data. Check internet and refresh.";
+        console.error(error);
       }
     }
 
-    els.themeToggle.addEventListener("click", toggleTheme);
-    initializeTheme();
-    loadJapanData();
+    init();
   </script>
 </body>
 </html>
