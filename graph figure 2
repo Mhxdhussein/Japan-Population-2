@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Japan Population Line Graph</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --bg-grad: #132343;
+      --card: #111a2c;
+      --text: #e8eefc;
+      --muted: #9fb0d1;
+      --border: #2b3f66;
+      --accent: #60a5fa;
+      --frame-bg: #ffffff;
+      --crop-top: 210px;
+      --crop-bottom: 640px;
+    }
+    body.light {
+      --bg: #eff4ff;
+      --bg-grad: #dce8ff;
+      --card: #ffffff;
+      --text: #0e1b33;
+      --muted: #4f607d;
+      --border: #c7d6f2;
+      --accent: #2563eb;
+      --frame-bg: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, var(--bg-grad) 0%, var(--bg) 56%);
+      color: var(--text);
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      transition: background 220ms ease, color 220ms ease;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 12px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    h1 { margin: 0 0 8px; font-size: 1.3rem; }
+    .sub { margin: 0; color: var(--muted); font-size: 0.92rem; }
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+    }
+    button {
+      border: 1px solid var(--border);
+      background: #17263f;
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    body.light button { background: #eaf1ff; }
+    .hint {
+      color: var(--muted);
+      font-size: 0.88rem;
+      text-align: left;
+    }
+
+    /* Crop to keep the interactive line graph area only. */
+    .graph-viewport {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--frame-bg);
+      height: 510px;
+      position: relative;
+    }
+    .graph-frame {
+      width: 100%;
+      height: calc(510px + var(--crop-top) + var(--crop-bottom));
+      border: 0;
+      position: absolute;
+      top: calc(-1 * var(--crop-top));
+      left: 0;
+    }
+    @media (max-width: 760px) {
+      .controls { grid-template-columns: 1fr; }
+      .graph-viewport { height: 480px; }
+      .graph-frame { height: calc(480px + var(--crop-top) + var(--crop-bottom)); }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <h1>Japan Population Line Graph</h1>
+      <p class="sub">Interactive line graph view from PopulationPyramid, with the pyramid area cropped out.</p>
+      <div class="controls">
+        <span class="hint">Use the controls inside the embedded chart.</span>
+        <button id="reloadBtn" type="button">Reload Chart</button>
+        <button id="themeBtn" type="button" aria-pressed="false">Switch to Light</button>
+      </div>
+    </section>
+
+    <section class="graph-viewport">
+      <iframe
+        id="graphFrame"
+        class="graph-frame"
+        title="Japan Population Line Graph"
+        src="https://www.populationpyramid.net/japan/2026/"
+        loading="lazy"
+      ></iframe>
+    </section>
+  </main>
+
+  <script>
+    const reloadBtn = document.getElementById("reloadBtn");
+    const themeBtn = document.getElementById("themeBtn");
+    const graphFrame = document.getElementById("graphFrame");
+    const body = document.body;
+
+    function applyTheme(theme) {
+      const isLight = theme === "light";
+      body.classList.toggle("light", isLight);
+      themeBtn.textContent = isLight ? "Switch to Dark" : "Switch to Light";
+      themeBtn.setAttribute("aria-pressed", String(isLight));
+      localStorage.setItem("theme", theme);
+    }
+
+    const savedTheme = localStorage.getItem("theme");
+    applyTheme(savedTheme === "light" ? "light" : "dark");
+
+    themeBtn.addEventListener("click", () => {
+      applyTheme(body.classList.contains("light") ? "dark" : "light");
+    });
+
+    reloadBtn.addEventListener("click", () => {
+      graphFrame.src = graphFrame.src;
+    });
+  </script>
+</body>
+</html>
