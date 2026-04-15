@@ -14,8 +14,8 @@
       --border: #2b3f66;
       --accent: #60a5fa;
       --frame-bg: #ffffff;
-      --crop-top: 210px;
-      --crop-bottom: 640px;
+      --crop-top: 248px;
+      --crop-bottom: 910px;
     }
     body.light {
       --bg: #eff4ff;
@@ -74,12 +74,12 @@
       border-radius: 12px;
       overflow: hidden;
       background: var(--frame-bg);
-      height: 510px;
+      height: 360px;
       position: relative;
     }
     .graph-frame {
       width: 100%;
-      height: calc(510px + var(--crop-top) + var(--crop-bottom));
+      height: calc(360px + var(--crop-top) + var(--crop-bottom));
       border: 0;
       position: absolute;
       top: calc(-1 * var(--crop-top));
@@ -87,8 +87,8 @@
     }
     @media (max-width: 760px) {
       .controls { grid-template-columns: 1fr; }
-      .graph-viewport { height: 480px; }
-      .graph-frame { height: calc(480px + var(--crop-top) + var(--crop-bottom)); }
+      .graph-viewport { height: 300px; }
+      .graph-frame { height: calc(300px + var(--crop-top) + var(--crop-bottom)); }
     }
   </style>
 </head>
@@ -111,6 +111,7 @@
         title="Japan Population Line Graph"
         src="https://www.populationpyramid.net/japan/2026/"
         loading="lazy"
+        scrolling="no"
       ></iframe>
     </section>
   </main>
