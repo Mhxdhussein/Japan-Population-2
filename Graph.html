@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Japan Population Line Graph</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <style>
     :root {
       --bg: #0b1220;
@@ -13,9 +14,7 @@
       --muted: #9fb0d1;
       --border: #2b3f66;
       --accent: #60a5fa;
-      --frame-bg: #ffffff;
-      --crop-top: 248px;
-      --crop-bottom: 910px;
+      --plot-bg: #0f1a30;
     }
     body.light {
       --bg: #eff4ff;
@@ -25,7 +24,7 @@
       --muted: #4f607d;
       --border: #c7d6f2;
       --accent: #2563eb;
-      --frame-bg: #ffffff;
+      --plot-bg: #f6f9ff;
     }
     * { box-sizing: border-box; }
     body {
@@ -47,7 +46,7 @@
     .sub { margin: 0; color: var(--muted); font-size: 0.92rem; }
     .controls {
       display: grid;
-      grid-template-columns: 1fr auto auto;
+      grid-template-columns: 1fr auto;
       gap: 10px;
       align-items: center;
       margin-top: 10px;
@@ -67,60 +66,137 @@
       font-size: 0.88rem;
       text-align: left;
     }
-
-    /* Crop to keep the interactive line graph area only. */
-    .graph-viewport {
+    .chart-wrap {
       border: 1px solid var(--border);
       border-radius: 12px;
-      overflow: hidden;
-      background: var(--frame-bg);
-      height: 360px;
-      position: relative;
+      background: var(--plot-bg);
+      padding: 14px;
     }
-    .graph-frame {
+    .chart-box {
+      position: relative;
       width: 100%;
-      height: calc(360px + var(--crop-top) + var(--crop-bottom));
-      border: 0;
-      position: absolute;
-      top: calc(-1 * var(--crop-top));
-      left: 0;
+      height: 440px;
+    }
+    #status {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.88rem;
     }
     @media (max-width: 760px) {
       .controls { grid-template-columns: 1fr; }
-      .graph-viewport { height: 300px; }
-      .graph-frame { height: calc(300px + var(--crop-top) + var(--crop-bottom)); }
+      .chart-box { height: 320px; }
     }
   </style>
 </head>
 <body>
   <main class="wrap">
     <section class="card">
-      <h1>Japan Population Line Graph</h1>
-      <p class="sub">Interactive line graph view from PopulationPyramid, with the pyramid area cropped out.</p>
+      <h1>Japan Population Pyramid (Only)</h1>
+      <p class="sub">Only the pyramid is shown. Everything else from the site is cropped out.</p>
       <div class="controls">
-        <span class="hint">Use the controls inside the embedded chart.</span>
-        <button id="reloadBtn" type="button">Reload Chart</button>
+        <span class="hint">Hover points for exact values. Scroll disabled because this is not an embedded page.</span>
         <button id="themeBtn" type="button" aria-pressed="false">Switch to Light</button>
       </div>
     </section>
 
-    <section class="graph-viewport">
-      <iframe
-        id="graphFrame"
-        class="graph-frame"
-        title="Japan Population Line Graph"
-        src="https://www.populationpyramid.net/japan/2026/"
-        loading="lazy"
-        scrolling="no"
-      ></iframe>
+    <section class="chart-wrap">
+      <div class="chart-box">
+        <canvas id="populationChart" aria-label="Japan population line chart"></canvas>
+      </div>
+      <div id="status">Loading population data...</div>
     </section>
   </main>
 
   <script>
-    const reloadBtn = document.getElementById("reloadBtn");
     const themeBtn = document.getElementById("themeBtn");
-    const graphFrame = document.getElementById("graphFrame");
+    const chartCanvas = document.getElementById("populationChart");
+    const statusEl = document.getElementById("status");
     const body = document.body;
+    let chart = null;
+
+    async function loadPopulationData() {
+      const response = await fetch(
+        "https://api.worldbank.org/v2/country/JPN/indicator/SP.POP.TOTL?format=json&per_page=200"
+      );
+      if (!response.ok) {
+        throw new Error("Could not load data.");
+      }
+      const payload = await response.json();
+      const rows = Array.isArray(payload) ? payload[1] : [];
+      const cleaned = rows
+        .filter((row) => row && row.value !== null)
+        .map((row) => ({ year: Number(row.date), value: Number(row.value) }))
+        .sort((a, b) => a.year - b.year);
+      return cleaned;
+    }
+
+    function chartColors() {
+      const isLight = body.classList.contains("light");
+      return {
+        text: isLight ? "#0e1b33" : "#e8eefc",
+        grid: isLight ? "#d4e0f7" : "#2b3f66",
+        line: isLight ? "#2563eb" : "#60a5fa",
+        fill: isLight ? "rgba(37, 99, 235, 0.15)" : "rgba(96, 165, 250, 0.18)"
+      };
+    }
+
+    function buildChart(data) {
+      const colors = chartColors();
+      const labels = data.map((d) => d.year);
+      const values = data.map((d) => d.value);
+
+      if (chart) chart.destroy();
+      chart = new Chart(chartCanvas, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [{
+            label: "Population",
+            data: values,
+            borderColor: colors.line,
+            backgroundColor: colors.fill,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+            borderWidth: 2.5,
+            tension: 0.2,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: "index", intersect: false },
+          plugins: {
+            legend: {
+              labels: { color: colors.text }
+            },
+            tooltip: {
+              callbacks: {
+                label(context) {
+                  const val = context.parsed.y ?? 0;
+                  return ` Population: ${new Intl.NumberFormat().format(val)}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: colors.text, maxTicksLimit: 12 },
+              grid: { color: colors.grid }
+            },
+            y: {
+              ticks: {
+                color: colors.text,
+                callback(value) {
+                  return `${(Number(value) / 1e6).toFixed(0)}M`;
+                }
+              },
+              grid: { color: colors.grid }
+            }
+          }
+        }
+      });
+    }
 
     function applyTheme(theme) {
       const isLight = theme === "light";
@@ -128,6 +204,14 @@
       themeBtn.textContent = isLight ? "Switch to Dark" : "Switch to Light";
       themeBtn.setAttribute("aria-pressed", String(isLight));
       localStorage.setItem("theme", theme);
+      if (chart) {
+        buildChart(
+          chart.data.labels.map((year, i) => ({
+            year: Number(year),
+            value: Number(chart.data.datasets[0].data[i])
+          }))
+        );
+      }
     }
 
     const savedTheme = localStorage.getItem("theme");
@@ -137,9 +221,14 @@
       applyTheme(body.classList.contains("light") ? "dark" : "light");
     });
 
-    reloadBtn.addEventListener("click", () => {
-      graphFrame.src = graphFrame.src;
-    });
+    loadPopulationData()
+      .then((data) => {
+        buildChart(data);
+        statusEl.textContent = `Loaded ${data.length} yearly points for Japan.`;
+      })
+      .catch(() => {
+        statusEl.textContent = "Failed to load chart data. Check internet connection and refresh.";
+      });
   </script>
 </body>
 </html>
